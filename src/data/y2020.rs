@@ -24,7 +24,6 @@ pub(crate) const Y2020: YearFact = YearFact {
 
     short_days: months! {
         Feb: [21],  // перед 23 февраля
-        Mar: [6],   // перед 8 марта
         Apr: [30],  // перед 1 мая
         May: [8],   // перед 9 мая
         Jun: [11],  // перед 12 июня

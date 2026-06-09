@@ -42,6 +42,30 @@ holidays_ru::is_holiday_ymd(2026, 1, 1).unwrap().value();    // true
 holidays_ru::is_short_day_ymd(2026, 11, 3).unwrap().value(); // true
 ```
 
+Date ranges use a half-open interval `[start, end)`:
+
+```rust
+use holidays_ru::WorkWeek;
+
+let days_off = holidays_ru::non_working_days_between_ymd(2026, 1, 1, 2027, 1, 1)
+    .unwrap()
+    .value();
+let minutes = holidays_ru::working_minutes_between_ymd(
+    2026,
+    1,
+    1,
+    2027,
+    1,
+    1,
+    WorkWeek::FortyHours,
+)
+.unwrap()
+.value();
+
+assert_eq!(days_off, 118);
+assert_eq!(minutes, 1972 * 60);
+```
+
 ## Supported years
 
 - **2000–2026** — official production calendar data, returned as `Resolved::Fact`.

@@ -45,6 +45,19 @@ impl RawDate {
         })
     }
 
+    /// Возвращает `true`, если дата входит в поддерживаемый диапазон `_ymd` API.
+    #[inline]
+    pub(crate) fn is_supported(self) -> bool {
+        (crate::MIN_YEAR..=crate::MAX_YEAR).contains(&self.year)
+    }
+
+    /// Возвращает `true`, если дата может быть правой границей диапазона.
+    #[inline]
+    pub(crate) fn is_supported_range_end(self) -> bool {
+        self.is_supported()
+            || (self.year == crate::MAX_YEAR + 1 && self.month == 1 && self.day == 1)
+    }
+
     /// Создаёт `RawDate` без проверки валидности.
     ///
     /// Используется только внутри prediction-алгоритма, где корректность

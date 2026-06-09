@@ -52,6 +52,7 @@
 mod data;
 mod day_flags;
 mod predict;
+mod range;
 mod raw_date;
 mod resolved;
 
@@ -61,6 +62,7 @@ pub mod date;
 mod official;
 
 pub use day_flags::DayFlags;
+pub use range::WorkWeek;
 pub use resolved::Resolved;
 
 #[cfg(any(feature = "time", feature = "chrono"))]
@@ -156,11 +158,55 @@ mod generic {
     pub fn is_transferred<D: CalendarDate>(date: D) -> Resolved<bool> {
         flags(date).map(DayFlags::is_transferred)
     }
+
+    /// Считает нерабочие дни в полуоткрытом диапазоне дат `[start, end)`.
+    ///
+    /// Возвращает `None`, если `start > end` или даты вне поддерживаемого
+    /// диапазона. Для `end` дополнительно допускается `MAX_YEAR + 1`-01-01,
+    /// чтобы диапазон мог включать [`MAX_YEAR`]-12-31.
+    /// Если хотя бы один день диапазона рассчитан прогнозом, итоговый результат
+    /// будет [`Resolved::Predict`].
+    #[inline]
+    pub fn non_working_days_between<D: CalendarDate>(start: D, end: D) -> Option<Resolved<u32>> {
+        let start = RawDate::from_calendar_date(start);
+        let end = RawDate::from_calendar_date(end);
+
+        range::non_working_days_between_raw(start, end)
+    }
+
+    /// Считает рабочее время в минутах в полуоткрытом диапазоне дат `[start, end)`.
+    ///
+    /// Нерабочие дни дают 0 минут. Сокращённые рабочие дни уменьшают норму
+    /// выбранной рабочей недели на 60 минут.
+    #[inline]
+    pub fn working_minutes_between<D: CalendarDate>(
+        start: D,
+        end: D,
+        week: WorkWeek,
+    ) -> Option<Resolved<u32>> {
+        let start = RawDate::from_calendar_date(start);
+        let end = RawDate::from_calendar_date(end);
+
+        range::working_minutes_between_raw(start, end, week)
+    }
+
+    /// Считает рабочее время в часах в полуоткрытом диапазоне дат `[start, end)`.
+    ///
+    /// Для точных расчётов используйте [`working_minutes_between`].
+    #[inline]
+    pub fn working_hours_between<D: CalendarDate>(
+        start: D,
+        end: D,
+        week: WorkWeek,
+    ) -> Option<Resolved<f64>> {
+        working_minutes_between(start, end, week).map(|r| r.map(|minutes| minutes as f64 / 60.0))
+    }
 }
 
 #[cfg(any(feature = "time", feature = "chrono"))]
 pub use generic::{
     flags, is_day_off, is_holiday, is_short_day, is_transferred, is_weekend, is_working_day,
+    non_working_days_between, working_hours_between, working_minutes_between,
 };
 
 // ---------------------------------------------------------------------------
@@ -233,6 +279,83 @@ pub fn is_weekend_ymd(year: i32, month: u8, day: u8) -> Option<Resolved<bool>> {
 #[inline]
 pub fn is_transferred_ymd(year: i32, month: u8, day: u8) -> Option<Resolved<bool>> {
     flags_ymd(year, month, day).map(|r| r.map(DayFlags::is_transferred))
+}
+
+/// Считает нерабочие дни в полуоткрытом диапазоне дат `[start, end)`.
+///
+/// Возвращает `None`, если одна из дат недействительна или `start > end`.
+/// Для `end` дополнительно допускается `MAX_YEAR + 1`-01-01, чтобы диапазон
+/// мог включать [`MAX_YEAR`]-12-31.
+/// Если хотя бы один день диапазона рассчитан прогнозом, итоговый результат
+/// будет [`Resolved::Predict`].
+#[inline]
+pub fn non_working_days_between_ymd(
+    start_year: i32,
+    start_month: u8,
+    start_day: u8,
+    end_year: i32,
+    end_month: u8,
+    end_day: u8,
+) -> Option<Resolved<u32>> {
+    let start = RawDate::from_ymd(start_year, start_month, start_day)?;
+    let end = range_end_raw_ymd(end_year, end_month, end_day)?;
+
+    range::non_working_days_between_raw(start, end)
+}
+
+/// Считает рабочее время в минутах в полуоткрытом диапазоне дат `[start, end)`.
+///
+/// Нерабочие дни дают 0 минут. Сокращённые рабочие дни уменьшают норму
+/// выбранной рабочей недели на 60 минут. Возвращает `None`, если одна из дат
+/// недействительна или `start > end`. Для `end` дополнительно допускается
+/// `MAX_YEAR + 1`-01-01, чтобы диапазон мог включать [`MAX_YEAR`]-12-31.
+#[inline]
+pub fn working_minutes_between_ymd(
+    start_year: i32,
+    start_month: u8,
+    start_day: u8,
+    end_year: i32,
+    end_month: u8,
+    end_day: u8,
+    week: WorkWeek,
+) -> Option<Resolved<u32>> {
+    let start = RawDate::from_ymd(start_year, start_month, start_day)?;
+    let end = range_end_raw_ymd(end_year, end_month, end_day)?;
+
+    range::working_minutes_between_raw(start, end, week)
+}
+
+/// Считает рабочее время в часах в полуоткрытом диапазоне дат `[start, end)`.
+///
+/// Для точных расчётов используйте [`working_minutes_between_ymd`].
+#[inline]
+pub fn working_hours_between_ymd(
+    start_year: i32,
+    start_month: u8,
+    start_day: u8,
+    end_year: i32,
+    end_month: u8,
+    end_day: u8,
+    week: WorkWeek,
+) -> Option<Resolved<f64>> {
+    working_minutes_between_ymd(
+        start_year,
+        start_month,
+        start_day,
+        end_year,
+        end_month,
+        end_day,
+        week,
+    )
+    .map(|r| r.map(|minutes| minutes as f64 / 60.0))
+}
+
+#[inline]
+fn range_end_raw_ymd(year: i32, month: u8, day: u8) -> Option<RawDate> {
+    RawDate::from_ymd(year, month, day).or_else(|| {
+        (year == MAX_YEAR + 1 && month == 1 && day == 1)
+            .then(|| RawDate::from_ymd_unchecked(year, month, day))
+    })
 }
 
 // ---------------------------------------------------------------------------
@@ -322,6 +445,23 @@ mod tests {
         assert!(flags_ymd(MIN_YEAR, 1, 1).is_some());
         assert!(flags_ymd(MAX_YEAR, 12, 31).is_some());
         assert!(flags_ymd(MAX_YEAR + 1, 1, 1).is_none());
+    }
+
+    #[test]
+    fn test_range_ymd_can_include_last_supported_day() {
+        assert!(non_working_days_between_ymd(MAX_YEAR, 12, 31, MAX_YEAR + 1, 1, 1).is_some());
+        assert!(
+            working_minutes_between_ymd(
+                MAX_YEAR,
+                12,
+                31,
+                MAX_YEAR + 1,
+                1,
+                1,
+                WorkWeek::FortyHours,
+            )
+            .is_some()
+        );
     }
 
     #[test]

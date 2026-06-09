@@ -56,12 +56,12 @@ mod tests {
     }
 
     #[test]
-    fn test_official_2026_feb20_short_day() {
-        // 20 февраля 2026 — пятница, короткий день перед 23 февраля (пн).
+    fn test_official_2026_feb20_not_short_day() {
+        // 20 февраля 2026 — пятница, но 21-22 февраля — выходные.
         let d = RawDate::from_ymd(2026, 2, 20).unwrap();
         let flags = flags(d).unwrap();
         assert!(flags.is_working_day());
-        assert!(flags.is_short_day());
+        assert!(!flags.is_short_day());
     }
 
     #[test]
@@ -131,12 +131,12 @@ mod tests {
     }
 
     #[test]
-    fn test_2026_mar6_short_day() {
-        // 6 марта 2026 — пятница, короткий день перед 8 марта (вс).
+    fn test_2026_mar6_not_short_day() {
+        // 6 марта 2026 — пятница, но 7 марта — выходной.
         let d = RawDate::from_ymd(2026, 3, 6).unwrap();
         let f = flags(d).unwrap();
         assert!(f.is_working_day());
-        assert!(f.is_short_day());
+        assert!(!f.is_short_day());
     }
 
     #[test]
