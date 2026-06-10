@@ -69,17 +69,17 @@ assert_eq!(minutes, 1972 * 60);
 ## Supported years
 
 - **2000–2026** — official production calendar data, returned as `Resolved::Fact`.
-- **1900–9998 outside the official-data range** — deterministic prediction based on the Labor Code, returned as `Resolved::Predict`.
+- **1900–2100 outside the official-data range** — deterministic prediction based on the Labor Code, returned as `Resolved::Predict`.
 
 Prediction is deterministic and conservative. It is not an official production calendar.
 Official transfers are defined by yearly government decrees and may differ from the prediction.
 
 ## Features
 
-| Feature  | Enables                                          |
-|----------|--------------------------------------------------|
-| `chrono` | `flags(date)` for `chrono::NaiveDate`            |
-| `time`   | `flags(date)` for `time::Date`                   |
+| Feature  | Enables                                                   |
+| -------- | --------------------------------------------------------- |
+| `chrono` | `flags(date)` for `chrono::NaiveDate`                     |
+| `time`   | `flags(date)` for `time::Date`                            |
 | `serde`  | `Serialize` / `Deserialize` for `DayFlags`, `Resolved<T>` |
 
 No features enabled — use `flags_ymd(year, month, day)`.
