@@ -7,6 +7,13 @@
 /// - `months!` — макрос для читаемого определения данных
 mod masks;
 mod months_macro;
+mod y1993;
+mod y1994;
+mod y1995;
+mod y1996;
+mod y1997;
+mod y1998;
+mod y1999;
 mod y2000;
 mod y2001;
 mod y2002;
@@ -62,13 +69,20 @@ pub(crate) struct YearFact {
 }
 
 /// Первый год, для которого есть официальные данные.
-pub(crate) const FACT_FIRST_YEAR: i32 = 2000;
+pub(crate) const FACT_FIRST_YEAR: i32 = 1993;
 
 /// Последний год, для которого есть официальные данные.
 pub(crate) const FACT_LAST_YEAR: i32 = 2026;
 
 /// Массив официальных данных по годам, индексируется как `year - FACT_FIRST_YEAR`.
-pub(crate) static FACT_YEARS: [YearFact; 27] = [
+pub(crate) static FACT_YEARS: [YearFact; 34] = [
+    y1993::Y1993,
+    y1994::Y1994,
+    y1995::Y1995,
+    y1996::Y1996,
+    y1997::Y1997,
+    y1998::Y1998,
+    y1999::Y1999,
     y2000::Y2000,
     y2001::Y2001,
     y2002::Y2002,

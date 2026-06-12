@@ -75,11 +75,30 @@ mod tests {
 
     #[test]
     fn test_official_year_out_of_range_is_none() {
-        let d = RawDate::from_ymd(1999, 1, 1).unwrap();
+        let d = RawDate::from_ymd(1992, 1, 1).unwrap();
         assert!(flags(d).is_none());
 
         let d = RawDate::from_ymd(2027, 1, 1).unwrap();
         assert!(flags(d).is_none());
+    }
+
+    #[test]
+    fn test_official_1993_jan4_extra_day_off() {
+        // 4 января 1993 — доп. выходной за 2 января, выпавшее на субботу.
+        let d = RawDate::from_ymd(1993, 1, 4).unwrap();
+        let f = flags(d).unwrap();
+        assert!(f.is_day_off());
+        assert!(!f.is_holiday());
+        assert!(f.is_transferred());
+    }
+
+    #[test]
+    fn test_official_1999_dec31_short_day() {
+        // 31 декабря 1999 — сокращённый рабочий день перед 1 января.
+        let d = RawDate::from_ymd(1999, 12, 31).unwrap();
+        let f = flags(d).unwrap();
+        assert!(f.is_working_day());
+        assert!(f.is_short_day());
     }
 
     // -------------------------------------------------------------------
