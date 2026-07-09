@@ -7,7 +7,7 @@ fn main() {
     println!("=== holidays-ru usage example ===\n");
 
     let date = (2026, 1u8, 9u8);
-    match holidays_ru::flags_ymd(date.0, date.1, date.2) {
+    match holidays_ru::flags_ymd::<holidays_ru::Federal>(date.0, date.1, date.2) {
         Some(result) => {
             let flags = result.value();
             println!(

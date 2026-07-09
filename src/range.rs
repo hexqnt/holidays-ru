@@ -1,5 +1,5 @@
 use crate::raw_date::RawDate;
-use crate::{DayFlags, Resolved, flags_raw};
+use crate::{Calendar, DayFlags, Resolved};
 
 /// Норма рабочей недели для расчёта рабочего времени.
 ///
@@ -34,20 +34,27 @@ impl WorkWeek {
 /// включать последний поддерживаемый день `MAX_YEAR`-12-31. Если хотя бы один
 /// день диапазона рассчитан прогнозом, итоговый результат будет
 /// [`Resolved::Predict`].
-pub(crate) fn non_working_days_between_raw(start: RawDate, end: RawDate) -> Option<Resolved<u32>> {
-    fold_days(start, end, |flags| u32::from(flags.is_day_off()))
+pub(crate) fn non_working_days_between_raw<C: Calendar>(
+    start: RawDate,
+    end: RawDate,
+) -> Option<Resolved<u32>> {
+    fold_days::<C>(start, end, |flags| u32::from(flags.is_day_off()))
 }
 
 /// Считает рабочее время в минутах в полуоткрытом диапазоне дат `[start, end)`.
 ///
 /// Нерабочие дни дают 0 минут. Сокращённые рабочие дни уменьшают норму
 /// выбранной рабочей недели на 60 минут.
-pub(crate) fn working_minutes_between_raw(
+pub(crate) fn working_minutes_between_raw<C: Calendar>(
     start: RawDate,
     end: RawDate,
     week: WorkWeek,
 ) -> Option<Resolved<u32>> {
-    fold_days(start, end, |flags| working_minutes_for_day(flags, week))
+    if !C::IS_COMPLETE {
+        return None;
+    }
+
+    fold_days::<C>(start, end, |flags| working_minutes_for_day(flags, week))
 }
 
 #[inline]
@@ -65,7 +72,7 @@ fn working_minutes_for_day(flags: DayFlags, week: WorkWeek) -> u32 {
     }
 }
 
-fn fold_days(
+fn fold_days<C: Calendar>(
     start: RawDate,
     end: RawDate,
     value: impl Fn(DayFlags) -> u32,
@@ -79,7 +86,7 @@ fn fold_days(
     let mut has_predict = false;
 
     while date < end {
-        let resolved = flags_raw(date);
+        let resolved = C::flags_ymd(date.year, date.month, date.day)?;
 
         has_predict |= resolved.is_predict();
         total = total.saturating_add(value(resolved.value()));
@@ -319,22 +326,27 @@ mod tests {
             let start = RawDate::from_ymd(year, 1, 1).expect("valid start date");
             let end = RawDate::from_ymd(year + 1, 1, 1).expect("valid end date");
 
-            let non_working = non_working_days_between_raw(start, end).expect("valid range");
+            let non_working =
+                non_working_days_between_raw::<crate::Federal>(start, end).expect("valid range");
             assert_eq!(non_working, Resolved::Fact(non_working_days), "{year}");
             assert_eq!(calendar_days - non_working.value(), working_days, "{year}");
 
             assert_eq!(
-                working_minutes_between_raw(start, end, WorkWeek::FortyHours),
+                working_minutes_between_raw::<crate::Federal>(start, end, WorkWeek::FortyHours),
                 Some(Resolved::Fact(h40)),
                 "{year}"
             );
             assert_eq!(
-                working_minutes_between_raw(start, end, WorkWeek::ThirtySixHours),
+                working_minutes_between_raw::<crate::Federal>(start, end, WorkWeek::ThirtySixHours),
                 Some(Resolved::Fact(h36)),
                 "{year}"
             );
             assert_eq!(
-                working_minutes_between_raw(start, end, WorkWeek::TwentyFourHours),
+                working_minutes_between_raw::<crate::Federal>(
+                    start,
+                    end,
+                    WorkWeek::TwentyFourHours
+                ),
                 Some(Resolved::Fact(h24)),
                 "{year}"
             );
@@ -346,11 +358,11 @@ mod tests {
         let date = RawDate::from_ymd(2026, 1, 1).expect("valid date");
 
         assert_eq!(
-            non_working_days_between_raw(date, date),
+            non_working_days_between_raw::<crate::Federal>(date, date),
             Some(Resolved::Fact(0))
         );
         assert_eq!(
-            working_minutes_between_raw(date, date, WorkWeek::FortyHours),
+            working_minutes_between_raw::<crate::Federal>(date, date, WorkWeek::FortyHours),
             Some(Resolved::Fact(0))
         );
     }
@@ -360,9 +372,12 @@ mod tests {
         let start = RawDate::from_ymd(2026, 1, 2).expect("valid start date");
         let end = RawDate::from_ymd(2026, 1, 1).expect("valid end date");
 
-        assert_eq!(non_working_days_between_raw(start, end), None);
         assert_eq!(
-            working_minutes_between_raw(start, end, WorkWeek::FortyHours),
+            non_working_days_between_raw::<crate::Federal>(start, end),
+            None
+        );
+        assert_eq!(
+            working_minutes_between_raw::<crate::Federal>(start, end, WorkWeek::FortyHours),
             None
         );
     }
@@ -373,7 +388,7 @@ mod tests {
         let end = RawDate::from_ymd(2027, 1, 2).expect("valid end date");
 
         assert_eq!(
-            non_working_days_between_raw(start, end),
+            non_working_days_between_raw::<crate::Federal>(start, end),
             Some(Resolved::Predict(2))
         );
     }
@@ -383,7 +398,10 @@ mod tests {
         let start = RawDate::from_ymd(crate::MAX_YEAR, 12, 31).expect("valid start date");
         let end = RawDate::from_ymd_unchecked(crate::MAX_YEAR + 1, 1, 1);
 
-        assert!(non_working_days_between_raw(start, end).is_some());
-        assert!(working_minutes_between_raw(start, end, WorkWeek::FortyHours).is_some());
+        assert!(non_working_days_between_raw::<crate::Federal>(start, end).is_some());
+        assert!(
+            working_minutes_between_raw::<crate::Federal>(start, end, WorkWeek::FortyHours)
+                .is_some()
+        );
     }
 }

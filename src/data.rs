@@ -8,6 +8,7 @@
 mod federal;
 mod masks;
 mod months_macro;
+pub(crate) mod regional;
 
 pub(crate) use masks::MonthMasks;
 pub(crate) use masks::days;
@@ -19,7 +20,7 @@ use crate::raw_date::RawDate;
 /// Фактические данные производственного календаря за один год.
 #[derive(Debug, Clone, Copy)]
 pub(crate) struct YearFact {
-    /// Федеральные нерабочие праздничные дни (ст. 112 ТК РФ).
+    /// Нерабочие праздничные дни календаря.
     pub holidays: MonthMasks,
 
     /// Дополнительные выходные дни (переносы с других дат).
@@ -47,7 +48,7 @@ pub(crate) fn fact_year(year: i32) -> Option<&'static YearFact> {
     federal::fact_year(year)
 }
 
-/// Собирает `DayFlags` из официальных данных года для конкретной даты.
+/// Собирает полные `DayFlags` из официальных данных года для конкретной даты.
 #[inline]
 pub(crate) fn flags_from_year_fact(fact: &YearFact, date: RawDate) -> DayFlags {
     let month = date.month;
@@ -69,6 +70,24 @@ pub(crate) fn flags_from_year_fact(fact: &YearFact, date: RawDate) -> DayFlags {
         .with_if(holiday, DayFlags::HOLIDAY)
         .with_if(day_off, DayFlags::DAY_OFF)
         .with_if(working_day, DayFlags::WORKING_DAY)
+        .with_if(short_day, DayFlags::SHORT_DAY)
+        .with_if(transferred, DayFlags::TRANSFERRED)
+}
+
+/// Собирает overlay-`DayFlags` из региональных данных года для конкретной даты.
+#[inline]
+pub(crate) fn flags_from_regional_year_fact(fact: &YearFact, date: RawDate) -> DayFlags {
+    let month = date.month;
+    let day = date.day;
+
+    let holiday = fact.holidays.contains(month, day);
+    let extra_day_off = fact.extra_days_off.contains(month, day);
+    let short_day = fact.short_days.contains(month, day);
+    let transferred = fact.transferred_days.contains(month, day);
+
+    DayFlags::EMPTY
+        .with_if(holiday, DayFlags::HOLIDAY)
+        .with_if(holiday || extra_day_off, DayFlags::DAY_OFF)
         .with_if(short_day, DayFlags::SHORT_DAY)
         .with_if(transferred, DayFlags::TRANSFERRED)
 }

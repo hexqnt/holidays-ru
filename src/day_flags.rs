@@ -2,7 +2,7 @@
 ///
 /// Каждый бит обозначает одно свойство:
 /// - `WEEKEND` — суббота или воскресенье
-/// - `HOLIDAY` — федеральный нерабочий праздничный день (ст. 112 ТК РФ)
+/// - `HOLIDAY` — нерабочий праздничный день выбранного календаря
 /// - `DAY_OFF` — день является выходным
 /// - `WORKING_DAY` — день является рабочим
 /// - `SHORT_DAY` — сокращённый рабочий день
@@ -26,7 +26,7 @@ impl DayFlags {
     /// Выходной день недели (суббота или воскресенье).
     pub const WEEKEND: Self = Self(1 << 0);
 
-    /// Федеральный нерабочий праздничный день.
+    /// Нерабочий праздничный день выбранного календаря.
     pub const HOLIDAY: Self = Self(1 << 1);
 
     /// День является выходным (нерабочим).
@@ -58,13 +58,29 @@ impl DayFlags {
         Self(self.0 | (other.0 & (condition as u8).wrapping_neg()))
     }
 
+    /// Объединяет полный календарь с overlay-календарём.
+    ///
+    /// Если overlay помечает дату как нерабочую, флаг [`WORKING_DAY`](Self::WORKING_DAY)
+    /// из базового календаря снимается.
+    #[inline]
+    #[must_use]
+    pub const fn with_overlay(self, overlay: Self) -> Self {
+        let mut bits = self.0 | overlay.0;
+
+        if overlay.is_day_off() {
+            bits &= !Self::WORKING_DAY.0;
+        }
+
+        Self(bits)
+    }
+
     /// Является ли день выходным днём недели (суббота или воскресенье).
     #[inline]
     pub const fn is_weekend(self) -> bool {
         self.0 & Self::WEEKEND.0 != 0
     }
 
-    /// Является ли день федеральным нерабочим праздничным днём.
+    /// Является ли день нерабочим праздничным днём выбранного календаря.
     #[inline]
     pub const fn is_holiday(self) -> bool {
         self.0 & Self::HOLIDAY.0 != 0

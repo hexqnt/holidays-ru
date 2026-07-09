@@ -11,7 +11,7 @@
 /// ```rust
 /// use holidays_ru;
 ///
-/// let result = holidays_ru::flags_ymd(2026, 1, 9).unwrap();
+/// let result = holidays_ru::flags_ymd::<holidays_ru::Federal>(2026, 1, 9).unwrap();
 /// ```
 pub trait CalendarDate: sealed::Sealed + Copy {
     /// Год.

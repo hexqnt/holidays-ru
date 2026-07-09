@@ -10,9 +10,9 @@ Russian holidays and working days lookup. Updated annually with the official pro
 Without dependencies — just year, month, day:
 
 ```rust
-use holidays_ru;
+use holidays_ru::{self, Federal};
 
-let result = holidays_ru::flags_ymd(2026, 1, 9).unwrap();
+let result = holidays_ru::flags_ymd::<Federal>(2026, 1, 9).unwrap();
 let flags = result.value();
 
 assert!(flags.is_day_off());
@@ -24,11 +24,11 @@ With `chrono` (feature `chrono`) or `time` (feature `time`):
 
 ```rust
 use chrono::NaiveDate;
-use holidays_ru::{flags, Resolved};
+use holidays_ru::{Federal, Resolved, flags};
 
 let date = NaiveDate::from_ymd_opt(2026, 1, 9).unwrap();
 
-match flags(date) {
+match flags::<Federal, _>(date).unwrap() {
     Resolved::Fact(flags) => println!("official: {flags:?}"),
     Resolved::Predict(flags) => println!("prediction: {flags:?}"),
 }
@@ -37,9 +37,9 @@ match flags(date) {
 Bool shortcuts:
 
 ```rust
-holidays_ru::is_day_off_ymd(2026, 1, 9).unwrap().value();   // true
-holidays_ru::is_holiday_ymd(2026, 1, 1).unwrap().value();    // true
-holidays_ru::is_short_day_ymd(2026, 11, 3).unwrap().value(); // true
+holidays_ru::is_day_off_ymd::<holidays_ru::Federal>(2026, 1, 9).unwrap().value();   // true
+holidays_ru::is_holiday_ymd::<holidays_ru::Federal>(2026, 1, 1).unwrap().value();    // true
+holidays_ru::is_short_day_ymd::<holidays_ru::Federal>(2026, 11, 3).unwrap().value(); // true
 ```
 
 Date ranges use a half-open interval `[start, end)`:
@@ -47,10 +47,10 @@ Date ranges use a half-open interval `[start, end)`:
 ```rust
 use holidays_ru::WorkWeek;
 
-let days_off = holidays_ru::non_working_days_between_ymd(2026, 1, 1, 2027, 1, 1)
+let days_off = holidays_ru::non_working_days_between_ymd::<holidays_ru::Federal>(2026, 1, 1, 2027, 1, 1)
     .unwrap()
     .value();
-let minutes = holidays_ru::working_minutes_between_ymd(
+let minutes = holidays_ru::working_minutes_between_ymd::<holidays_ru::Federal>(
     2026,
     1,
     1,
@@ -78,8 +78,8 @@ Official transfers are defined by yearly government decrees and may differ from 
 
 | Feature  | Enables                                                   |
 | -------- | --------------------------------------------------------- |
-| `chrono` | `flags(date)` for `chrono::NaiveDate`                     |
-| `time`   | `flags(date)` for `time::Date`                            |
+| `chrono` | `flags::<Federal, _>(date)` for `chrono::NaiveDate`       |
+| `time`   | `flags::<Federal, _>(date)` for `time::Date`              |
 | `serde`  | `Serialize` / `Deserialize` for `DayFlags`, `Resolved<T>` |
 
-No features enabled — use `flags_ymd(year, month, day)`.
+No features enabled — use `flags_ymd::<Federal>(year, month, day)`.
