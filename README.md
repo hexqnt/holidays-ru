@@ -68,8 +68,17 @@ assert_eq!(minutes, 1972 * 60);
 
 ## Supported years
 
+### Federal calendar (`Federal`)
+
 - **1993–2026** — official production calendar data, returned as `Resolved::Fact`.
 - **1900–2100 outside the official-data range** — deterministic prediction based on the Labor Code, returned as `Resolved::Predict`.
+
+### Regional calendars (`calendar::regions::*`)
+
+Overlay calendars with non-working holidays specific to subjects of the Russian Federation
+(e.g. `Tatarstan`, `Bashkortostan`, `Crimea`). Each region has its own fact range
+and falls back to a fixed-date prediction outside it. Regional calendars must be
+combined with the federal calendar for a complete picture.
 
 Prediction is deterministic and conservative. It is not an official production calendar.
 Official transfers are defined by yearly government decrees and may differ from the prediction.
