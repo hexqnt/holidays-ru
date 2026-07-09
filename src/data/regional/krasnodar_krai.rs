@@ -10,6 +10,7 @@ pub(crate) const FIRST_YEAR: i32 = 2024;
 /// Региональный overlay-календарь: Краснодарский край, 2024 год.
 pub(crate) const Y2024: YearFact = YearFact {
     holidays: months! {
+        // Закон Краснодарского края от 02.06.2023 N 4909-КЗ: День поминовения усопших (Радоница).
         May: [14],
     },
     extra_days_off: months! {},
@@ -21,6 +22,7 @@ pub(crate) const Y2024: YearFact = YearFact {
 /// Региональный overlay-календарь: Краснодарский край, 2025 год.
 pub(crate) const Y2025: YearFact = YearFact {
     holidays: months! {
+        // Закон Краснодарского края от 02.06.2023 N 4909-КЗ: День поминовения усопших (Радоница).
         Apr: [29],
     },
     extra_days_off: months! {},
@@ -32,6 +34,7 @@ pub(crate) const Y2025: YearFact = YearFact {
 /// Региональный overlay-календарь: Краснодарский край, 2026 год.
 pub(crate) const Y2026: YearFact = YearFact {
     holidays: months! {
+        // Закон Краснодарского края от 02.06.2023 N 4909-КЗ: День поминовения усопших (Радоница).
         Apr: [21],
     },
     extra_days_off: months! {},
@@ -39,6 +42,7 @@ pub(crate) const Y2026: YearFact = YearFact {
     short_days: months! {},
     transferred_days: months! {},
 };
+
 static YEARS: [YearFact; 3] = [Y2024, Y2025, Y2026];
 
 /// Прогноз регионального overlay-календаря по ежегодным фиксированным датам.

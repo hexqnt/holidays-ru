@@ -10,6 +10,7 @@ pub(crate) const FIRST_YEAR: i32 = 2024;
 /// Региональный overlay-календарь: Республика Бурятия, 2024 год.
 pub(crate) const Y2024: YearFact = YearFact {
     holidays: months! {
+        // Указ Главы Республики Бурятия от 25.12.2023 N 231: Сагаалган.
         Feb: [10],
     },
     extra_days_off: months! {},
@@ -21,6 +22,7 @@ pub(crate) const Y2024: YearFact = YearFact {
 /// Региональный overlay-календарь: Республика Бурятия, 2025 год.
 pub(crate) const Y2025: YearFact = YearFact {
     holidays: months! {
+        // Указ Главы Республики Бурятия от 09.01.2025 N 1: Сагаалган.
         Mar: [1],
     },
     extra_days_off: months! {},
@@ -32,6 +34,7 @@ pub(crate) const Y2025: YearFact = YearFact {
 /// Региональный overlay-календарь: Республика Бурятия, 2026 год.
 pub(crate) const Y2026: YearFact = YearFact {
     holidays: months! {
+        // Указ Главы Республики Бурятия от 05.12.2025 N 320: Сагаалган.
         Feb: [18],
     },
     extra_days_off: months! {},
@@ -39,6 +42,7 @@ pub(crate) const Y2026: YearFact = YearFact {
     short_days: months! {},
     transferred_days: months! {},
 };
+
 static YEARS: [YearFact; 3] = [Y2024, Y2025, Y2026];
 
 /// Прогноз регионального overlay-календаря по ежегодным фиксированным датам.

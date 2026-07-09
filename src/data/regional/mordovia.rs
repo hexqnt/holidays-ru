@@ -28,6 +28,7 @@ pub(crate) const Y2025: YearFact = YearFact {
 /// Региональный overlay-календарь: Республика Мордовия, 2026 год.
 pub(crate) const Y2026: YearFact = YearFact {
     holidays: months! {
+        // Указ Главы Республики Мордовия от 08.12.2025 N 473-УГ: День 25-летия канонизации святого праведного воина Феодора Ушакова.
         Aug: [5],
     },
     extra_days_off: months! {},
@@ -35,6 +36,7 @@ pub(crate) const Y2026: YearFact = YearFact {
     short_days: months! {},
     transferred_days: months! {},
 };
+
 static YEARS: [YearFact; 3] = [Y2024, Y2025, Y2026];
 
 /// Прогноз регионального overlay-календаря по ежегодным фиксированным датам.

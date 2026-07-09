@@ -28,6 +28,7 @@ pub(crate) const Y2025: YearFact = YearFact {
 /// Региональный overlay-календарь: Омская область, 2026 год.
 pub(crate) const Y2026: YearFact = YearFact {
     holidays: months! {
+        // Указ Губернатора Омской области от 17.04.2026 N 80: Радоница.
         Apr: [21],
     },
     extra_days_off: months! {},
@@ -35,6 +36,7 @@ pub(crate) const Y2026: YearFact = YearFact {
     short_days: months! {},
     transferred_days: months! {},
 };
+
 static YEARS: [YearFact; 3] = [Y2024, Y2025, Y2026];
 
 /// Прогноз регионального overlay-календаря по ежегодным фиксированным датам.
