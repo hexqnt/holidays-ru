@@ -1,3 +1,5 @@
+use super::YearFact;
+
 mod y1993;
 mod y1994;
 mod y1995;
@@ -32,8 +34,6 @@ mod y2023;
 mod y2024;
 mod y2025;
 mod y2026;
-
-use super::YearFact;
 
 /// Первый год, для которого есть официальные федеральные данные.
 pub(crate) const FACT_FIRST_YEAR: i32 = 1993;
@@ -84,7 +84,7 @@ static FACT_YEARS: [YearFact; 34] = [
 /// Возвращает официальные федеральные данные для указанного года, если они есть.
 #[inline]
 pub(crate) fn fact_year(year: i32) -> Option<&'static YearFact> {
-    let idx = year.checked_sub(FACT_FIRST_YEAR)? as usize;
+    let idx = usize::try_from(year.checked_sub(FACT_FIRST_YEAR)?).ok()?;
 
     FACT_YEARS.get(idx)
 }

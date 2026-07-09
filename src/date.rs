@@ -1,3 +1,18 @@
+#[cfg(feature = "chrono")]
+use chrono::{Datelike, Weekday};
+
+/// Модуль для запечатывания трейта `CalendarDate`.
+mod sealed {
+    /// Супертрейт, который невозможно реализовать вне крейта.
+    pub trait Sealed {}
+
+    #[cfg(feature = "time")]
+    impl Sealed for time::Date {}
+
+    #[cfg(feature = "chrono")]
+    impl Sealed for chrono::NaiveDate {}
+}
+
 /// Трейт для типов дат из внешних крейтов.
 ///
 /// Этот трейт запечатан (`sealed`) — пользователь не может реализовать его
@@ -29,21 +44,6 @@ pub trait CalendarDate: sealed::Sealed + Copy {
     /// День недели: 0 = понедельник, ..., 6 = воскресенье.
     fn weekday_number_from_monday(self) -> u8;
 }
-
-/// Модуль для запечатывания трейта `CalendarDate`.
-mod sealed {
-    /// Супертрейт, который невозможно реализовать вне крейта.
-    pub trait Sealed {}
-
-    #[cfg(feature = "time")]
-    impl Sealed for time::Date {}
-
-    #[cfg(feature = "chrono")]
-    impl Sealed for chrono::NaiveDate {}
-}
-
-#[cfg(feature = "chrono")]
-use chrono::{Datelike, Weekday};
 
 #[cfg(feature = "chrono")]
 impl CalendarDate for chrono::NaiveDate {

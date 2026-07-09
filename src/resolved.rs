@@ -36,6 +36,7 @@ impl<T> Resolved<T> {
     /// assert_eq!(Resolved::Predict(20).value(), 20);
     /// ```
     #[inline]
+    #[must_use]
     pub fn value(self) -> T {
         match self {
             Self::Fact(value) | Self::Predict(value) => value,
@@ -44,18 +45,21 @@ impl<T> Resolved<T> {
 
     /// Возвращает `true`, если результат основан на официальных данных.
     #[inline]
+    #[must_use]
     pub const fn is_fact(&self) -> bool {
         matches!(self, Self::Fact(_))
     }
 
     /// Возвращает `true`, если результат получен прогнозом.
     #[inline]
+    #[must_use]
     pub const fn is_predict(&self) -> bool {
         matches!(self, Self::Predict(_))
     }
 
     /// Применяет функцию к внутреннему значению, сохраняя обёртку `Fact`/`Predict`.
     #[inline]
+    #[must_use]
     pub fn map<U>(self, f: impl FnOnce(T) -> U) -> Resolved<U> {
         match self {
             Self::Fact(value) => Resolved::Fact(f(value)),
@@ -65,6 +69,7 @@ impl<T> Resolved<T> {
 
     /// Возвращает внутреннее значение как ссылку.
     #[inline]
+    #[must_use]
     pub const fn as_ref(&self) -> Resolved<&T> {
         match self {
             Self::Fact(value) => Resolved::Fact(value),

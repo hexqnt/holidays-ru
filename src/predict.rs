@@ -2,6 +2,23 @@ use crate::DayFlags;
 use crate::data::{FEDERAL_HOLIDAYS, MonthDay, NON_JANUARY_HOLIDAYS};
 use crate::raw_date::RawDate;
 
+/// Структура для хранения до двух дат-целей январских переносов.
+#[derive(Debug, Clone, Copy)]
+struct TransferTargets {
+    first: Option<MonthDay>,
+    second: Option<MonthDay>,
+}
+
+impl TransferTargets {
+    /// Проверяет, содержится ли указанная дата среди целей переносов.
+    #[inline]
+    fn contains(self, month: u8, day: u8) -> bool {
+        let needle = MonthDay::new(month, day);
+
+        self.first == Some(needle) || self.second == Some(needle)
+    }
+}
+
 /// Алгоритмический прогноз свойств дня для будущих лет.
 ///
 /// Используется, когда для запрошенного года нет официальных данных.
@@ -191,23 +208,6 @@ fn next_predicted_working_day_from(mut date: RawDate) -> RawDate {
 #[inline]
 fn is_predicted_base_working_day(date: RawDate) -> bool {
     !is_weekend(date) && !is_federal_holiday(date)
-}
-
-/// Структура для хранения до двух дат-целей январских переносов.
-#[derive(Debug, Clone, Copy)]
-struct TransferTargets {
-    first: Option<MonthDay>,
-    second: Option<MonthDay>,
-}
-
-impl TransferTargets {
-    /// Проверяет, содержится ли указанная дата среди целей переносов.
-    #[inline]
-    fn contains(self, month: u8, day: u8) -> bool {
-        let needle = MonthDay::new(month, day);
-
-        self.first == Some(needle) || self.second == Some(needle)
-    }
 }
 
 #[cfg(test)]

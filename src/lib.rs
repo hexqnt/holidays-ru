@@ -49,6 +49,18 @@
 //!
 //! Без фич библиотека работает только через `_ymd` API.
 
+use predict as predict_mod;
+use raw_date::RawDate;
+
+pub use calendar::regions;
+pub use calendar::{Calendar, Federal};
+pub use day_flags::DayFlags;
+pub use range::WorkWeek;
+pub use resolved::Resolved;
+
+#[cfg(any(feature = "time", feature = "chrono"))]
+pub use date::CalendarDate;
+
 mod calendar;
 mod data;
 mod day_flags;
@@ -61,15 +73,6 @@ mod resolved;
 pub mod date;
 
 mod official;
-
-pub use calendar::regions;
-pub use calendar::{Calendar, Federal};
-pub use day_flags::DayFlags;
-pub use range::WorkWeek;
-pub use resolved::Resolved;
-
-#[cfg(any(feature = "time", feature = "chrono"))]
-pub use date::CalendarDate;
 
 /// Первый год, для которого есть официальные данные производственного календаря.
 pub const FIRST_FACT_YEAR: i32 = data::FACT_FIRST_YEAR;
@@ -86,17 +89,21 @@ pub const MIN_YEAR: i32 = 1900;
 /// в prediction-алгоритме.
 pub const MAX_YEAR: i32 = 2100;
 
-use predict as predict_mod;
-use raw_date::RawDate;
-
 // ---------------------------------------------------------------------------
 // Generic API (CalendarDate)
 // ---------------------------------------------------------------------------
 
 #[cfg(any(feature = "time", feature = "chrono"))]
+pub use generic::{
+    flags, is_day_off, is_holiday, is_short_day, is_transferred, is_weekend, is_working_day,
+    non_working_days_between, working_hours_between, working_minutes_between,
+};
+
+#[cfg(any(feature = "time", feature = "chrono"))]
 mod generic {
-    use super::*;
     use crate::date::CalendarDate;
+
+    use super::{Calendar, DayFlags, RawDate, Resolved, WorkWeek, range};
 
     /// Возвращает [`DayFlags`] для указанной даты.
     ///
@@ -118,6 +125,7 @@ mod generic {
     /// # }
     /// ```
     #[inline]
+    #[must_use]
     pub fn flags<C: Calendar, D: CalendarDate>(date: D) -> Option<Resolved<DayFlags>> {
         let raw = RawDate::from_calendar_date(date);
         C::flags_ymd(raw.year, raw.month, raw.day)
@@ -128,36 +136,42 @@ mod generic {
     /// Объединяет weekend, праздники и дополнительные выходные.
     /// Не различает факт и прогноз — для этого используйте `match` на результате.
     #[inline]
+    #[must_use]
     pub fn is_day_off<C: Calendar, D: CalendarDate>(date: D) -> Option<Resolved<bool>> {
         flags::<C, _>(date).map(|r| r.map(DayFlags::is_day_off))
     }
 
     /// Возвращает `true`, если день рабочий.
     #[inline]
+    #[must_use]
     pub fn is_working_day<C: Calendar, D: CalendarDate>(date: D) -> Option<Resolved<bool>> {
         flags::<C, _>(date).map(|r| r.map(DayFlags::is_working_day))
     }
 
     /// Возвращает `true`, если день является федеральным нерабочим праздничным днём.
     #[inline]
+    #[must_use]
     pub fn is_holiday<C: Calendar, D: CalendarDate>(date: D) -> Option<Resolved<bool>> {
         flags::<C, _>(date).map(|r| r.map(DayFlags::is_holiday))
     }
 
     /// Возвращает `true`, если день является сокращённым рабочим днём.
     #[inline]
+    #[must_use]
     pub fn is_short_day<C: Calendar, D: CalendarDate>(date: D) -> Option<Resolved<bool>> {
         flags::<C, _>(date).map(|r| r.map(DayFlags::is_short_day))
     }
 
     /// Возвращает `true`, если день — суббота или воскресенье.
     #[inline]
+    #[must_use]
     pub fn is_weekend<C: Calendar, D: CalendarDate>(date: D) -> Option<Resolved<bool>> {
         flags::<C, _>(date).map(|r| r.map(DayFlags::is_weekend))
     }
 
     /// Возвращает `true`, если день затронут переносом выходного.
     #[inline]
+    #[must_use]
     pub fn is_transferred<C: Calendar, D: CalendarDate>(date: D) -> Option<Resolved<bool>> {
         flags::<C, _>(date).map(|r| r.map(DayFlags::is_transferred))
     }
@@ -170,6 +184,7 @@ mod generic {
     /// Если хотя бы один день диапазона рассчитан прогнозом, итоговый результат
     /// будет [`Resolved::Predict`].
     #[inline]
+    #[must_use]
     pub fn non_working_days_between<C: Calendar, D: CalendarDate>(
         start: D,
         end: D,
@@ -185,6 +200,7 @@ mod generic {
     /// Нерабочие дни дают 0 минут. Сокращённые рабочие дни уменьшают норму
     /// выбранной рабочей недели на 60 минут.
     #[inline]
+    #[must_use]
     pub fn working_minutes_between<C: Calendar, D: CalendarDate>(
         start: D,
         end: D,
@@ -200,21 +216,16 @@ mod generic {
     ///
     /// Для точных расчётов используйте [`working_minutes_between`].
     #[inline]
+    #[must_use]
     pub fn working_hours_between<C: Calendar, D: CalendarDate>(
         start: D,
         end: D,
         week: WorkWeek,
     ) -> Option<Resolved<f64>> {
         working_minutes_between::<C, _>(start, end, week)
-            .map(|r| r.map(|minutes| minutes as f64 / 60.0))
+            .map(|r| r.map(|minutes| f64::from(minutes) / 60.0))
     }
 }
-
-#[cfg(any(feature = "time", feature = "chrono"))]
-pub use generic::{
-    flags, is_day_off, is_holiday, is_short_day, is_transferred, is_weekend, is_working_day,
-    non_working_days_between, working_hours_between, working_minutes_between,
-};
 
 // ---------------------------------------------------------------------------
 // YMD API (без внешних зависимостей)
@@ -235,6 +246,7 @@ pub use generic::{
 /// assert!(result.value().is_day_off());
 /// ```
 #[inline]
+#[must_use]
 pub fn flags_ymd<C: Calendar>(year: i32, month: u8, day: u8) -> Option<Resolved<DayFlags>> {
     C::flags_ymd(year, month, day)
 }
@@ -243,6 +255,7 @@ pub fn flags_ymd<C: Calendar>(year: i32, month: u8, day: u8) -> Option<Resolved<
 ///
 /// `None` означает невалидную дату.
 #[inline]
+#[must_use]
 pub fn is_day_off_ymd<C: Calendar>(year: i32, month: u8, day: u8) -> Option<Resolved<bool>> {
     flags_ymd::<C>(year, month, day).map(|r| r.map(DayFlags::is_day_off))
 }
@@ -251,6 +264,7 @@ pub fn is_day_off_ymd<C: Calendar>(year: i32, month: u8, day: u8) -> Option<Reso
 ///
 /// `None` означает невалидную дату.
 #[inline]
+#[must_use]
 pub fn is_working_day_ymd<C: Calendar>(year: i32, month: u8, day: u8) -> Option<Resolved<bool>> {
     flags_ymd::<C>(year, month, day).map(|r| r.map(DayFlags::is_working_day))
 }
@@ -259,6 +273,7 @@ pub fn is_working_day_ymd<C: Calendar>(year: i32, month: u8, day: u8) -> Option<
 ///
 /// `None` означает невалидную дату.
 #[inline]
+#[must_use]
 pub fn is_holiday_ymd<C: Calendar>(year: i32, month: u8, day: u8) -> Option<Resolved<bool>> {
     flags_ymd::<C>(year, month, day).map(|r| r.map(DayFlags::is_holiday))
 }
@@ -267,6 +282,7 @@ pub fn is_holiday_ymd<C: Calendar>(year: i32, month: u8, day: u8) -> Option<Reso
 ///
 /// `None` означает невалидную дату.
 #[inline]
+#[must_use]
 pub fn is_short_day_ymd<C: Calendar>(year: i32, month: u8, day: u8) -> Option<Resolved<bool>> {
     flags_ymd::<C>(year, month, day).map(|r| r.map(DayFlags::is_short_day))
 }
@@ -275,6 +291,7 @@ pub fn is_short_day_ymd<C: Calendar>(year: i32, month: u8, day: u8) -> Option<Re
 ///
 /// `None` означает невалидную дату.
 #[inline]
+#[must_use]
 pub fn is_weekend_ymd<C: Calendar>(year: i32, month: u8, day: u8) -> Option<Resolved<bool>> {
     flags_ymd::<C>(year, month, day).map(|r| r.map(DayFlags::is_weekend))
 }
@@ -283,6 +300,7 @@ pub fn is_weekend_ymd<C: Calendar>(year: i32, month: u8, day: u8) -> Option<Reso
 ///
 /// `None` означает невалидную дату.
 #[inline]
+#[must_use]
 pub fn is_transferred_ymd<C: Calendar>(year: i32, month: u8, day: u8) -> Option<Resolved<bool>> {
     flags_ymd::<C>(year, month, day).map(|r| r.map(DayFlags::is_transferred))
 }
@@ -295,6 +313,7 @@ pub fn is_transferred_ymd<C: Calendar>(year: i32, month: u8, day: u8) -> Option<
 /// Если хотя бы один день диапазона рассчитан прогнозом, итоговый результат
 /// будет [`Resolved::Predict`].
 #[inline]
+#[must_use]
 pub fn non_working_days_between_ymd<C: Calendar>(
     start_year: i32,
     start_month: u8,
@@ -316,6 +335,7 @@ pub fn non_working_days_between_ymd<C: Calendar>(
 /// недействительна или `start > end`. Для `end` дополнительно допускается
 /// `MAX_YEAR + 1`-01-01, чтобы диапазон мог включать [`MAX_YEAR`]-12-31.
 #[inline]
+#[must_use]
 pub fn working_minutes_between_ymd<C: Calendar>(
     start_year: i32,
     start_month: u8,
@@ -335,6 +355,7 @@ pub fn working_minutes_between_ymd<C: Calendar>(
 ///
 /// Для точных расчётов используйте [`working_minutes_between_ymd`].
 #[inline]
+#[must_use]
 pub fn working_hours_between_ymd<C: Calendar>(
     start_year: i32,
     start_month: u8,
@@ -353,7 +374,7 @@ pub fn working_hours_between_ymd<C: Calendar>(
         end_day,
         week,
     )
-    .map(|r| r.map(|minutes| minutes as f64 / 60.0))
+    .map(|r| r.map(|minutes| f64::from(minutes) / 60.0))
 }
 
 #[inline]

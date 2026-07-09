@@ -5,6 +5,8 @@
 use crate::raw_date::RawDate;
 use crate::{DayFlags, Resolved};
 
+use super::{YearFact, flags_from_regional_year_fact};
+
 pub(crate) mod adygea;
 pub(crate) mod altai_republic;
 pub(crate) mod bashkortostan;
@@ -31,8 +33,6 @@ pub(crate) mod tatarstan;
 pub(crate) mod tuva;
 pub(crate) mod zabaykalsky_krai;
 
-use super::{YearFact, flags_from_regional_year_fact};
-
 #[inline]
 fn resolve(
     date: RawDate,
@@ -43,7 +43,8 @@ fn resolve(
     let fact = date
         .year
         .checked_sub(first_year)
-        .and_then(|idx| years.get(idx as usize));
+        .and_then(|idx| usize::try_from(idx).ok())
+        .and_then(|idx| years.get(idx));
 
     match fact {
         Some(fact) => Resolved::Fact(flags_from_regional_year_fact(fact, date)),

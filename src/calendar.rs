@@ -5,6 +5,21 @@ mod sealed {
     pub trait Sealed {}
 }
 
+/// Федеральный производственный календарь РФ.
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, Hash)]
+pub struct Federal;
+
+impl Calendar for Federal {
+    const IS_COMPLETE: bool = true;
+
+    #[inline]
+    fn flags_ymd(year: i32, month: u8, day: u8) -> Option<Resolved<DayFlags>> {
+        RawDate::from_ymd(year, month, day).map(federal_flags_raw)
+    }
+}
+
+impl sealed::Sealed for Federal {}
+
 /// Типизированный источник календарных данных.
 ///
 /// Реализации этого trait предоставляются крейтом. Пользователь выбирает
@@ -15,21 +30,6 @@ pub trait Calendar: sealed::Sealed {
 
     /// Возвращает [`DayFlags`] для даты, заданной годом, месяцем и днём.
     fn flags_ymd(year: i32, month: u8, day: u8) -> Option<Resolved<DayFlags>>;
-}
-
-/// Федеральный производственный календарь РФ.
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, Hash)]
-pub struct Federal;
-
-impl sealed::Sealed for Federal {}
-
-impl Calendar for Federal {
-    const IS_COMPLETE: bool = true;
-
-    #[inline]
-    fn flags_ymd(year: i32, month: u8, day: u8) -> Option<Resolved<DayFlags>> {
-        RawDate::from_ymd(year, month, day).map(federal_flags_raw)
-    }
 }
 
 #[inline]
