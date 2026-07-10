@@ -187,4 +187,3 @@ impl<'de, T: serde::Deserialize<'de>> serde::Deserialize<'de> for Resolved<T> {
         )
     }
 }
-
