@@ -553,6 +553,18 @@ mod tests {
     }
 
     #[test]
+    fn test_tuva_constitution_day_was_added_in_2001() {
+        for year in [1999, 2000] {
+            let flags = flags_ymd::<regions::Tuva>(year, 5, 6).unwrap().value();
+            assert_eq!(flags, DayFlags::EMPTY, "{year}-05-06");
+        }
+
+        let flags = flags_ymd::<regions::Tuva>(2001, 5, 6).unwrap().value();
+        assert!(flags.is_holiday());
+        assert!(flags.is_day_off());
+    }
+
+    #[test]
     fn test_irkutsk_oblast_excludes_territorial_sagaalgan() {
         let included = flags_ymd::<regions::IrkutskOblast>(2026, 4, 21)
             .unwrap()
