@@ -37,3 +37,8 @@ jobs:
 
       - name: Tests without features
         run: cargo test --workspace --no-default-features --locked
+
+      - name: Documentation
+        env:
+          RUSTDOCFLAGS: -D warnings
+        run: cargo doc --workspace --no-deps --all-features --locked

@@ -36,6 +36,15 @@ jobs:
       - name: Tests
         run: cargo test --workspace --all-features --locked
 
+      - name: Documentation
+        env:
+          RUSTDOCFLAGS: -D warnings
+        run: cargo doc --workspace --no-deps --all-features --locked
+
+      - name: Verify tag matches package version
+        if: startsWith(github.ref, 'refs/tags/')
+        run: test "$GITHUB_REF_NAME" = "v$(cargo metadata --no-deps --format-version 1 | jq -r '.packages[0].version')"
+
       - name: Dry run publish
         run: cargo publish --locked --dry-run
 

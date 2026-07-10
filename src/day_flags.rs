@@ -88,15 +88,16 @@ impl DayFlags {
 
     /// Объединяет полный календарь с overlay-календарём.
     ///
-    /// Если overlay помечает дату как нерабочую, флаг [`WORKING_DAY`](Self::WORKING_DAY)
-    /// из базового календаря снимается.
+    /// Если overlay помечает дату как нерабочую, флаги
+    /// [`WORKING_DAY`](Self::WORKING_DAY) и [`SHORT_DAY`](Self::SHORT_DAY)
+    /// из базового календаря снимаются.
     #[inline]
     #[must_use]
     pub const fn with_overlay(self, overlay: Self) -> Self {
         let mut bits = self.0 | overlay.0;
 
         if overlay.is_day_off() {
-            bits &= !Self::WORKING_DAY.0;
+            bits &= !(Self::WORKING_DAY.0 | Self::SHORT_DAY.0);
         }
 
         Self(bits)
@@ -570,6 +571,19 @@ mod algebra_tests {
         let common = federal + regional;
         assert!(common.is_day_off());
         assert!(common.is_holiday());
+    }
+
+    #[test]
+    fn overlay_day_off_clears_working_and_short_day() {
+        let federal = DayFlags::WORKING_DAY.with(DayFlags::SHORT_DAY);
+        let regional = DayFlags::HOLIDAY.with(DayFlags::DAY_OFF);
+
+        let combined = federal.with_overlay(regional);
+
+        assert!(combined.is_day_off());
+        assert!(combined.is_holiday());
+        assert!(!combined.is_working_day());
+        assert!(!combined.is_short_day());
     }
 
     #[test]
