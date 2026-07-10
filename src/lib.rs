@@ -43,8 +43,8 @@
 //!
 //! ## Feature flags
 //!
-//! - `chrono` — поддержка [`chrono::NaiveDate`]
-//! - `time` — поддержка [`time::Date`]
+//! - `chrono` — поддержка `chrono::NaiveDate`
+//! - `time` — поддержка `time::Date`
 //! - `serde` — сериализация [`DayFlags`] и [`Resolved<T>`]
 //!
 //! Без фич библиотека работает только через `_ymd` API.
@@ -53,7 +53,7 @@ use predict as predict_mod;
 use raw_date::RawDate;
 
 pub use calendar::regions;
-pub use calendar::{Calendar, Federal};
+pub use calendar::{Calendar, Federal, RegionalCalendar};
 pub use day_flags::DayFlags;
 pub use range::WorkWeek;
 pub use resolved::Resolved;
@@ -95,15 +95,18 @@ pub const MAX_YEAR: i32 = 2100;
 
 #[cfg(any(feature = "time", feature = "chrono"))]
 pub use generic::{
-    flags, is_day_off, is_holiday, is_short_day, is_transferred, is_weekend, is_working_day,
-    non_working_days_between, working_hours_between, working_minutes_between,
+    flags, flags_with_region, is_day_off, is_holiday, is_short_day, is_transferred, is_weekend,
+    is_working_day, non_working_days_between, working_hours_between, working_minutes_between,
 };
 
 #[cfg(any(feature = "time", feature = "chrono"))]
 mod generic {
     use crate::date::CalendarDate;
 
-    use super::{Calendar, DayFlags, RawDate, Resolved, WorkWeek, range};
+    use super::{
+        Calendar, DayFlags, RawDate, RegionalCalendar, Resolved, WorkWeek, combine_federal_region,
+        range,
+    };
 
     /// Возвращает [`DayFlags`] для указанной даты.
     ///
@@ -129,6 +132,20 @@ mod generic {
     pub fn flags<C: Calendar, D: CalendarDate>(date: D) -> Option<Resolved<DayFlags>> {
         let raw = RawDate::from_calendar_date(date);
         C::flags_ymd(raw.year, raw.month, raw.day)
+    }
+
+    /// Возвращает полный календарь для даты с учётом региональных исключений.
+    ///
+    /// Объединяет федеральный производственный календарь с указанным
+    /// региональным overlay-календарём. Если хотя бы одна из частей является
+    /// прогнозом, возвращается [`Resolved::Predict`].
+    #[inline]
+    #[must_use]
+    pub fn flags_with_region<R: RegionalCalendar, D: CalendarDate>(
+        date: D,
+    ) -> Option<Resolved<DayFlags>> {
+        let raw = RawDate::from_calendar_date(date);
+        combine_federal_region::<R>(raw)
     }
 
     /// Возвращает `true`, если день выходной.
@@ -251,6 +268,45 @@ mod generic {
 #[must_use]
 pub fn flags_ymd<C: Calendar>(year: i32, month: u8, day: u8) -> Option<Resolved<DayFlags>> {
     C::flags_ymd(year, month, day)
+}
+
+/// Возвращает полный календарь с учётом региональных исключений.
+///
+/// Объединяет [`Federal`] с regional overlay-календарём `R`, например
+/// [`regions::Tatarstan`]. Если хотя бы одна из частей является прогнозом,
+/// возвращается [`Resolved::Predict`].
+///
+/// ```rust
+/// use holidays_ru::{self, regions};
+///
+/// let flags = holidays_ru::flags_with_region_ymd::<regions::Tatarstan>(2026, 11, 6)
+///     .unwrap()
+///     .value();
+///
+/// assert!(flags.is_day_off());
+/// assert!(flags.is_holiday());
+/// ```
+#[inline]
+#[must_use]
+pub fn flags_with_region_ymd<R: RegionalCalendar>(
+    year: i32,
+    month: u8,
+    day: u8,
+) -> Option<Resolved<DayFlags>> {
+    combine_federal_region::<R>(RawDate::from_ymd(year, month, day)?)
+}
+
+#[inline]
+fn combine_federal_region<R: RegionalCalendar>(date: RawDate) -> Option<Resolved<DayFlags>> {
+    let federal = Federal::flags_ymd(date.year, date.month, date.day)?;
+    let region = R::flags_ymd(date.year, date.month, date.day)?;
+
+    Some(match (federal, region) {
+        (Resolved::Fact(federal), Resolved::Fact(region)) => {
+            Resolved::Fact(federal.with_overlay(region))
+        }
+        (federal, region) => Resolved::Predict(federal.value().with_overlay(region.value())),
+    })
 }
 
 /// Возвращает `true`, если день выходной.
@@ -600,6 +656,25 @@ mod tests {
     }
 
     #[test]
+    fn test_flags_with_region_ymd_combines_full_calendar() {
+        let flags = flags_with_region_ymd::<regions::Tatarstan>(2026, 11, 6)
+            .unwrap()
+            .value();
+
+        assert!(flags.is_day_off());
+        assert!(flags.is_holiday());
+        assert!(!flags.is_working_day());
+    }
+
+    #[test]
+    fn test_flags_with_region_ymd_is_predict_if_region_is_predict() {
+        let result = flags_with_region_ymd::<regions::Tatarstan>(2027, 8, 30).unwrap();
+
+        assert!(result.is_predict());
+        assert!(result.value().is_day_off());
+    }
+
+    #[test]
     fn test_regional_out_of_range_is_predict() {
         let fixed = flags_ymd::<regions::Tatarstan>(2027, 8, 30).unwrap();
         assert!(fixed.is_predict());
@@ -632,6 +707,16 @@ mod tests {
         fn test_is_day_off_with_naive_date() {
             let date = NaiveDate::from_ymd_opt(2026, 1, 9).unwrap();
             assert!(is_day_off::<Federal, _>(date).unwrap().value());
+        }
+
+        #[test]
+        fn test_flags_with_region_with_naive_date() {
+            let date = NaiveDate::from_ymd_opt(2026, 11, 6).unwrap();
+            let flags = flags_with_region::<regions::Tatarstan, _>(date)
+                .unwrap()
+                .value();
+
+            assert!(flags.is_day_off());
         }
 
         #[test]
@@ -682,6 +767,16 @@ mod tests {
         fn test_is_day_off_with_time_date() {
             let date = Date::from_calendar_date(2026, Month::January, 9).unwrap();
             assert!(is_day_off::<Federal, _>(date).unwrap().value());
+        }
+
+        #[test]
+        fn test_flags_with_region_with_time_date() {
+            let date = Date::from_calendar_date(2026, Month::November, 6).unwrap();
+            let flags = flags_with_region::<regions::Tatarstan, _>(date)
+                .unwrap()
+                .value();
+
+            assert!(flags.is_day_off());
         }
 
         #[test]

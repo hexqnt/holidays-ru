@@ -1,3 +1,28 @@
+#[cfg(all(test, feature = "serde"))]
+mod serde_tests {
+    use super::*;
+
+    #[test]
+    fn test_serde_json_fact_format() {
+        let value = Resolved::Fact(42u8);
+        let json = serde_json::to_string(&value).unwrap();
+
+        assert_eq!(json, r#"{"kind":"Fact","value":42}"#);
+        assert_eq!(serde_json::from_str::<Resolved<u8>>(&json).unwrap(), value);
+    }
+
+    #[test]
+    fn test_serde_json_predict_format() {
+        let value = Resolved::Predict(false);
+        let json = serde_json::to_string(&value).unwrap();
+
+        assert_eq!(json, r#"{"kind":"Predict","value":false}"#);
+        assert_eq!(
+            serde_json::from_str::<Resolved<bool>>(&json).unwrap(),
+            value
+        );
+    }
+}
 /// Результат запроса к календарю: факт или прогноз.
 ///
 /// # Семантика
@@ -163,28 +188,3 @@ impl<'de, T: serde::Deserialize<'de>> serde::Deserialize<'de> for Resolved<T> {
     }
 }
 
-#[cfg(all(test, feature = "serde"))]
-mod serde_tests {
-    use super::*;
-
-    #[test]
-    fn test_serde_json_fact_format() {
-        let value = Resolved::Fact(42u8);
-        let json = serde_json::to_string(&value).unwrap();
-
-        assert_eq!(json, r#"{"kind":"Fact","value":42}"#);
-        assert_eq!(serde_json::from_str::<Resolved<u8>>(&json).unwrap(), value);
-    }
-
-    #[test]
-    fn test_serde_json_predict_format() {
-        let value = Resolved::Predict(false);
-        let json = serde_json::to_string(&value).unwrap();
-
-        assert_eq!(json, r#"{"kind":"Predict","value":false}"#);
-        assert_eq!(
-            serde_json::from_str::<Resolved<bool>>(&json).unwrap(),
-            value
-        );
-    }
-}

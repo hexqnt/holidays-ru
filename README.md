@@ -42,6 +42,18 @@ holidays_ru::is_holiday_ymd::<holidays_ru::Federal>(2026, 1, 1).unwrap().value()
 holidays_ru::is_short_day_ymd::<holidays_ru::Federal>(2026, 11, 3).unwrap().value(); // true
 ```
 
+Full calendar with regional holidays:
+
+```rust
+use holidays_ru::regions::Tatarstan;
+
+let flags = holidays_ru::flags_with_region_ymd::<Tatarstan>(2026, 11, 6)
+    .unwrap()
+    .value();
+
+assert!(flags.is_day_off()); // Tatarstan Constitution Day
+```
+
 Date ranges use a half-open interval `[start, end)`:
 
 ```rust

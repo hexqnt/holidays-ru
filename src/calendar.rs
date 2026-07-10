@@ -32,6 +32,14 @@ pub trait Calendar: sealed::Sealed {
     fn flags_ymd(year: i32, month: u8, day: u8) -> Option<Resolved<DayFlags>>;
 }
 
+/// Типизированный источник региональных overlay-данных.
+///
+/// Такой календарь содержит только региональные исключения и должен
+/// объединяться с [`Federal`] для получения полного производственного
+/// календаря. Для этого используйте [`crate::flags_with_region_ymd`] или,
+/// при включённой фиче `chrono` либо `time`, `crate::flags_with_region`.
+pub trait RegionalCalendar: Calendar {}
+
 #[inline]
 pub(crate) fn federal_flags_raw(date: RawDate) -> Resolved<DayFlags> {
     if let Some(flags) = official::flags(date) {
@@ -62,6 +70,8 @@ macro_rules! region_marker {
                 Some(crate::data::regional::$module::flags(date))
             }
         }
+
+        impl super::RegionalCalendar for $name {}
     };
 }
 
