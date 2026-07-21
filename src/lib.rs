@@ -53,7 +53,7 @@ use predict as predict_mod;
 use raw_date::RawDate;
 
 pub use calendar::regions;
-pub use calendar::{Calendar, Federal, RegionalCalendar};
+pub use calendar::{Calendar, Federal, FederalWithRegion, RegionalCalendar};
 pub use day_flags::DayFlags;
 pub use range::WorkWeek;
 pub use resolved::Resolved;
@@ -104,8 +104,7 @@ mod generic {
     use crate::date::CalendarDate;
 
     use super::{
-        Calendar, DayFlags, RawDate, RegionalCalendar, Resolved, WorkWeek, combine_federal_region,
-        range,
+        Calendar, DayFlags, FederalWithRegion, RawDate, RegionalCalendar, Resolved, WorkWeek, range,
     };
 
     /// Возвращает [`DayFlags`] для указанной даты.
@@ -145,7 +144,7 @@ mod generic {
         date: D,
     ) -> Option<Resolved<DayFlags>> {
         let raw = RawDate::from_calendar_date(date);
-        combine_federal_region::<R>(raw)
+        FederalWithRegion::<R>::flags_ymd(raw.year, raw.month, raw.day)
     }
 
     /// Возвращает `true`, если день выходной.
@@ -293,20 +292,7 @@ pub fn flags_with_region_ymd<R: RegionalCalendar>(
     month: u8,
     day: u8,
 ) -> Option<Resolved<DayFlags>> {
-    combine_federal_region::<R>(RawDate::from_ymd(year, month, day)?)
-}
-
-#[inline]
-fn combine_federal_region<R: RegionalCalendar>(date: RawDate) -> Option<Resolved<DayFlags>> {
-    let federal = Federal::flags_ymd(date.year, date.month, date.day)?;
-    let region = R::flags_ymd(date.year, date.month, date.day)?;
-
-    Some(match (federal, region) {
-        (Resolved::Fact(federal), Resolved::Fact(region)) => {
-            Resolved::Fact(federal.with_overlay(region))
-        }
-        (federal, region) => Resolved::Predict(federal.value().with_overlay(region.value())),
-    })
+    FederalWithRegion::<R>::flags_ymd(year, month, day)
 }
 
 /// Возвращает `true`, если день выходной.
@@ -591,6 +577,29 @@ mod tests {
         let r = flags_ymd::<regions::Tatarstan>(2026, 11, 6).unwrap();
         assert!(r.value().is_holiday());
         assert!(r.value().is_day_off());
+    }
+
+    #[test]
+    fn test_full_regional_calendar_supports_ranges() {
+        type Tatarstan = FederalWithRegion<regions::Tatarstan>;
+
+        assert_eq!(
+            non_working_days_between_ymd::<Tatarstan>(2026, 11, 6, 2026, 11, 7),
+            Some(Resolved::Fact(1))
+        );
+
+        assert_eq!(
+            working_minutes_between_ymd::<Tatarstan>(
+                2026,
+                11,
+                6,
+                2026,
+                11,
+                7,
+                WorkWeek::FortyHours,
+            ),
+            Some(Resolved::Fact(0))
+        );
     }
 
     #[test]

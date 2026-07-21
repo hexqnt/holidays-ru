@@ -1,5 +1,6 @@
 use crate::raw_date::RawDate;
 use crate::{DayFlags, Resolved, official, predict_mod};
+use core::marker::PhantomData;
 
 mod sealed {
     pub trait Sealed {}
@@ -20,6 +21,48 @@ impl Calendar for Federal {
 
 impl sealed::Sealed for Federal {}
 
+/// Полный производственный календарь с региональными исключениями.
+///
+/// Тип объединяет федеральный календарь с региональным overlay-календарём `R`.
+/// В отличие от самого `R`, результат содержит полную информацию о рабочих и
+/// нерабочих днях, поэтому может использоваться во всех функциях для
+/// диапазонов дат.
+///
+/// # Пример
+///
+/// ```rust
+/// use holidays_ru::{FederalWithRegion, regions};
+///
+/// type Tatarstan = FederalWithRegion<regions::Tatarstan>;
+///
+/// let Some(flags) = holidays_ru::flags_ymd::<Tatarstan>(2026, 11, 6) else {
+///     return;
+/// };
+/// let flags = flags.value();
+/// assert!(flags.is_day_off());
+/// ```
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, Hash)]
+pub struct FederalWithRegion<R: RegionalCalendar>(PhantomData<fn() -> R>);
+
+impl<R: RegionalCalendar> sealed::Sealed for FederalWithRegion<R> {}
+
+impl<R: RegionalCalendar> Calendar for FederalWithRegion<R> {
+    const IS_COMPLETE: bool = true;
+
+    #[inline]
+    fn flags_ymd(year: i32, month: u8, day: u8) -> Option<Resolved<DayFlags>> {
+        let federal = Federal::flags_ymd(year, month, day)?;
+        let region = R::flags_ymd(year, month, day)?;
+
+        Some(match (federal, region) {
+            (Resolved::Fact(federal), Resolved::Fact(region)) => {
+                Resolved::Fact(federal.with_overlay(region))
+            }
+            (federal, region) => Resolved::Predict(federal.value().with_overlay(region.value())),
+        })
+    }
+}
+
 /// Типизированный источник календарных данных.
 ///
 /// Реализации этого trait предоставляются крейтом. Пользователь выбирает
@@ -36,8 +79,9 @@ pub trait Calendar: sealed::Sealed {
 ///
 /// Такой календарь содержит только региональные исключения и должен
 /// объединяться с [`Federal`] для получения полного производственного
-/// календаря. Для этого используйте [`crate::flags_with_region_ymd`] или,
-/// при включённой фиче `chrono` либо `time`, `crate::flags_with_region`.
+/// календаря. Для этого используйте [`FederalWithRegion`],
+/// [`crate::flags_with_region_ymd`] или, при включённой фиче `chrono` либо
+/// `time`, [`crate::flags_with_region`].
 pub trait RegionalCalendar: Calendar {}
 
 #[inline]

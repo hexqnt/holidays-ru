@@ -1,0 +1,53 @@
+"""Russian production calendars backed by the ``holidays-ru`` Rust crate."""
+
+from ._api import (
+    Calendar,
+    DataSource,
+    DayFlags,
+    DayInfo,
+    Region,
+    Resolved,
+    WorkWeek,
+    day_info,
+    is_day_off,
+    is_holiday,
+    is_short_day,
+    is_transferred,
+    is_weekend,
+    is_working_day,
+    non_working_days_between,
+    working_hours_between,
+    working_minutes_between,
+)
+from ._holidays_ru import (
+    FIRST_FACT_YEAR,
+    LAST_FACT_YEAR,
+    MAX_YEAR,
+    MIN_YEAR,
+    __version__,
+)
+
+__all__ = [
+    "FIRST_FACT_YEAR",
+    "LAST_FACT_YEAR",
+    "MAX_YEAR",
+    "MIN_YEAR",
+    "Calendar",
+    "DataSource",
+    "DayFlags",
+    "DayInfo",
+    "Region",
+    "Resolved",
+    "WorkWeek",
+    "__version__",
+    "day_info",
+    "is_day_off",
+    "is_holiday",
+    "is_short_day",
+    "is_transferred",
+    "is_weekend",
+    "is_working_day",
+    "non_working_days_between",
+    "working_hours_between",
+    "working_minutes_between",
+]

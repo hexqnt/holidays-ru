@@ -1,6 +1,11 @@
+[workspace]
+members = ["bindings/python"]
+default-members = ["."]
+resolver = "3"
+
 [package]
 name = "holidays-ru"
-version = "0.2.0"
+version = "0.2.1"
 edition = "2024"
 license = "MIT OR Apache-2.0"
 repository = "https://github.com/hexqnt/holidays-ru"
@@ -16,12 +21,12 @@ keywords = [
 ]
 categories = ["date-and-time", "data-structures"]
 include = [
-    "src/**",
-    "examples/**",
-    "Cargo.toml",
-    "README.md",
-    "LICENSE-MIT",
-    "LICENSE-APACHE",
+    "/src/**",
+    "/examples/**",
+    "/Cargo.toml",
+    "/README.md",
+    "/LICENSE-MIT",
+    "/LICENSE-APACHE",
 ]
 
 [features]

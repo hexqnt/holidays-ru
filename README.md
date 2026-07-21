@@ -54,6 +54,30 @@ let flags = holidays_ru::flags_with_region_ymd::<Tatarstan>(2026, 11, 6)
 assert!(flags.is_day_off()); // Tatarstan Constitution Day
 ```
 
+The type-level [`FederalWithRegion`](https://docs.rs/holidays-ru/latest/holidays_ru/struct.FederalWithRegion.html)
+can be used when a full regional calendar is needed by generic and range APIs:
+
+```rust
+use holidays_ru::{FederalWithRegion, WorkWeek, regions};
+
+type Tatarstan = FederalWithRegion<regions::Tatarstan>;
+
+let Some(minutes) = holidays_ru::working_minutes_between_ymd::<Tatarstan>(
+    2026,
+    11,
+    6,
+    2026,
+    11,
+    7,
+    WorkWeek::FortyHours,
+) else {
+    return;
+};
+let minutes = minutes.value();
+
+assert_eq!(minutes, 0);
+```
+
 Date ranges use a half-open interval `[start, end)`:
 
 ```rust
@@ -104,3 +128,31 @@ Official transfers are defined by yearly government decrees and may differ from 
 | `serde`  | `Serialize` / `Deserialize` for `DayFlags`, `Resolved<T>` |
 
 No features enabled — use `flags_ymd::<Federal>(year, month, day)`.
+
+## Python bindings
+
+Python bindings live in [`bindings/python`](bindings/python) as a separate
+workspace package. PyO3 is not a dependency or feature of the Rust library, so
+Rust consumers do not compile or link any Python-specific code.
+
+```python
+from datetime import date
+from holidays_ru import Calendar, Region
+
+calendar = Calendar(Region.TATARSTAN)
+info = calendar.day(date(2026, 11, 6))
+
+assert info.is_day_off
+assert info.is_official
+```
+
+For local development:
+
+```console
+cd bindings/python
+python -m pip install -e ".[test]"
+python -m pytest
+python -m mypy
+python -m ruff check .
+python -m ruff format --check .
+```

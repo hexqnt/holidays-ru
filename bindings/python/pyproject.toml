@@ -1,0 +1,47 @@
+[build-system]
+requires = ["maturin>=1.9,<2.0"]
+build-backend = "maturin"
+
+[project]
+name = "holidays-ru"
+dynamic = ["version"]
+description = "Russian holidays and working days lookup."
+readme = "README.md"
+requires-python = ">=3.11"
+license = "MIT OR Apache-2.0"
+keywords = ["holidays", "russia", "calendar", "working-days"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: Implementation :: CPython",
+    "Programming Language :: Rust",
+    "Typing :: Typed",
+]
+
+[project.urls]
+Repository = "https://github.com/hexqnt/holidays-ru"
+Documentation = "https://github.com/hexqnt/holidays-ru/tree/main/bindings/python"
+
+[project.optional-dependencies]
+test = ["mypy>=1.15,<2", "pytest>=8,<10", "ruff>=0.12,<1"]
+
+[tool.maturin]
+bindings = "pyo3"
+module-name = "holidays_ru._holidays_ru"
+python-source = "python"
+
+[tool.mypy]
+strict = true
+files = ["python", "tests"]
+
+[tool.pytest.ini_options]
+addopts = ["--strict-config", "--strict-markers"]
+testpaths = ["tests"]
+
+[tool.ruff]
+target-version = "py311"
+line-length = 100
+
+[tool.ruff.lint]
+select = ["E4", "E7", "E9", "F", "I", "UP", "B", "RUF"]
