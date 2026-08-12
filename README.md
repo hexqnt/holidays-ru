@@ -156,3 +156,23 @@ python -m mypy
 python -m ruff check .
 python -m ruff format --check .
 ```
+
+## Julia bindings
+
+Julia bindings live in [`bindings/julia`](bindings/julia). The Julia package
+uses a native module built with `jlrs`; that module is an isolated Cargo
+workspace, so normal Rust and Python builds do not require Julia or `libjulia`.
+
+```julia
+using Dates
+using HolidaysRu
+
+calendar = Calendar(Tatarstan)
+info = day_info(calendar, Date(2026, 11, 6))
+
+@assert is_day_off(info)
+@assert is_official(info)
+```
+
+See [`bindings/julia/README.md`](bindings/julia/README.md) for native build and
+test commands.

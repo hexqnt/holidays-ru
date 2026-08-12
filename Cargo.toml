@@ -1,5 +1,6 @@
 [workspace]
-members = ["bindings/python"]
+members = ["bindings/common", "bindings/python"]
+exclude = ["bindings/julia/native"]
 default-members = ["."]
 resolver = "3"
 

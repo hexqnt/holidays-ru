@@ -4,3 +4,7 @@
 __pycache__/
 *.py[cod]
 .pytest_cache/
+/bindings/python/python/holidays_ru/*.so
+/bindings/julia/Manifest.toml
+/bindings/julia/native/target/
+*.so

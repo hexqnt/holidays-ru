@@ -13,4 +13,5 @@ crate-type = ["cdylib"]
 
 [dependencies]
 holidays-ru = { path = "../..", version = "0.2.1" }
+holidays-ru-bindings-common = { path = "../common" }
 pyo3 = { version = "0.29", features = ["abi3-py311"] }

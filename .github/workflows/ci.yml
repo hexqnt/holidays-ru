@@ -80,3 +80,58 @@ jobs:
       - name: Python lint and format
         working-directory: bindings/python
         run: python -m ruff check . && python -m ruff format --check .
+
+  julia:
+    name: Julia ${{ matrix.julia-version }} bindings
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        julia-version: ["1.10", "1.11", "1.12"]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: stable
+          components: rustfmt, clippy
+
+      - name: Setup Julia
+        uses: julia-actions/setup-julia@v2
+        with:
+          version: ${{ matrix.julia-version }}
+
+      - name: Cache Rust build
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: bindings/julia/native -> target
+
+      - name: Cache Julia packages
+        uses: julia-actions/cache@v2
+
+      - name: Configure jlrs
+        run: echo "JLRS_JULIA_DIR=$(julia -e 'print(dirname(Sys.BINDIR))')" >> "$GITHUB_ENV"
+
+      - name: Format native module
+        working-directory: bindings/julia/native
+        run: cargo fmt --all -- --check
+
+      - name: Clippy native module
+        working-directory: bindings/julia/native
+        run: cargo clippy --all-targets --all-features --locked -- -D warnings
+
+      - name: Test native module
+        working-directory: bindings/julia/native
+        run: cargo test --all-features --locked
+
+      - name: Build native module
+        working-directory: bindings/julia/native
+        run: cargo build --locked
+
+      - name: Julia tests
+        working-directory: bindings/julia
+        run: julia --project=. -e 'using Pkg; Pkg.instantiate(); Pkg.test()'
