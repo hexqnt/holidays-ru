@@ -1,4 +1,7 @@
 # holidays-ru
+
+[🇺🇸 English](./README.md) · [🇷🇺 Русский](./README.ru.md)
+
 [![CI](https://github.com/hexqnt/holidays-ru/actions/workflows/ci.yml/badge.svg)](https://github.com/hexqnt/holidays-ru/actions/workflows/ci.yml)
 [![crates.io](https://img.shields.io/crates/v/holidays-ru.svg)](https://crates.io/crates/holidays-ru)
 [![docs.rs](https://img.shields.io/docsrs/holidays-ru)](https://docs.rs/holidays-ru)
@@ -109,7 +112,7 @@ assert_eq!(minutes, 1972 * 60);
 - **1993–2026** — official production calendar data, returned as `Resolved::Fact`.
 - **1900–2100 outside the official-data range** — deterministic prediction based on the Labor Code, returned as `Resolved::Predict`.
 
-### Regional calendars (`calendar::regions::*`)
+### Regional calendars (`regions::*`)
 
 Overlay calendars with non-working holidays specific to subjects of the Russian Federation
 (e.g. `Tatarstan`, `Bashkortostan`, `Crimea`). Each region has its own fact range
@@ -131,9 +134,8 @@ No features enabled — use `flags_ymd::<Federal>(year, month, day)`.
 
 ## Python bindings
 
-Python bindings live in [`bindings/python`](bindings/python) as a separate
-workspace package. PyO3 is not a dependency or feature of the Rust library, so
-Rust consumers do not compile or link any Python-specific code.
+Python bindings live in a separate workspace package under
+[`bindings/python`](bindings/python), so Rust consumers do not build or link PyO3.
 
 ```python
 from datetime import date
@@ -159,9 +161,9 @@ python -m ruff format --check .
 
 ## Julia bindings
 
-Julia bindings live in [`bindings/julia`](bindings/julia). The Julia package
-uses a native module built with `jlrs`; that module is an isolated Cargo
-workspace, so normal Rust and Python builds do not require Julia or `libjulia`.
+Julia bindings live in [`bindings/julia`](bindings/julia). Their `jlrs` native
+module is an isolated Cargo workspace, so Rust and Python builds do not require
+Julia or `libjulia`.
 
 ```julia
 using Dates
