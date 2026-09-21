@@ -150,7 +150,7 @@ assert info.is_official
 
 For local development:
 
-```console
+```sh
 cd bindings/python
 python -m pip install -e ".[test]"
 python -m pytest

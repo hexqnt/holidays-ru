@@ -157,7 +157,7 @@ assert info.is_official
 
 Для локальной разработки:
 
-```console
+```sh
 cd bindings/python
 python -m pip install -e ".[test]"
 python -m pytest
