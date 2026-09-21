@@ -116,8 +116,20 @@ pub(crate) const Y2026: YearFact = YearFact {
     transferred_days: months! {},
 };
 
-static YEARS: [YearFact; 9] = [
-    Y2018, Y2019, Y2020, Y2021, Y2022, Y2023, Y2024, Y2025, Y2026,
+/// Региональный overlay-календарь: Республика Северная Осетия - Алания, 2027 год.
+pub(crate) const Y2027: YearFact = YearFact {
+    holidays: months! {
+        // Закон Республики Северная Осетия - Алания от 02.10.2018 N 61-РЗ: первый понедельник праздника Уастырджи.
+        Nov: [22],
+    },
+    extra_days_off: months! {},
+    working_days: months! {},
+    short_days: months! {},
+    transferred_days: months! {},
+};
+
+static YEARS: [YearFact; 10] = [
+    Y2018, Y2019, Y2020, Y2021, Y2022, Y2023, Y2024, Y2025, Y2026, Y2027,
 ];
 
 /// Прогноз регионального overlay-календаря по ежегодным фиксированным датам.

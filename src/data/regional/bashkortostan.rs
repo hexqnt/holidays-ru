@@ -569,7 +569,7 @@ pub(crate) const Y2027: YearFact = YearFact {
     extra_days_off: months! { May: [17] },
     working_days: months! {},
     short_days: months! {},
-    transferred_days: months! { May: [17] },
+    transferred_days: months! { May: [16, 17] },
 };
 
 static YEARS: [YearFact; 35] = [

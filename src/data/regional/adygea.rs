@@ -494,11 +494,11 @@ pub(crate) const Y2027: YearFact = YearFact {
         // Закон Республики Адыгея от 14.02.1995 N 168-1: День образования Республики Адыгея.
         Oct: [5],
     },
-    // Выходной после Курбан-Байрама, совпавшего с воскресеньем.
+    // Статья 112 ТК РФ: перенос с воскресенья 16 мая на понедельник 17 мая.
     extra_days_off: months! { May: [17] },
     working_days: months! {},
     short_days: months! {},
-    transferred_days: months! { May: [17] },
+    transferred_days: months! { May: [16, 17] },
 };
 
 static YEARS: [YearFact; 33] = [

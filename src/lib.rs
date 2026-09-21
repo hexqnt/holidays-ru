@@ -636,7 +636,10 @@ mod tests {
         for (month, day) in [(3, 9), (5, 16), (10, 11)] {
             let result = flags_ymd::<regions::Bashkortostan>(2027, month, day).unwrap();
             assert!(result.is_fact(), "Bashkortostan {month:02}-{day:02}");
-            assert!(result.value().is_holiday(), "Bashkortostan {month:02}-{day:02}");
+            assert!(
+                result.value().is_holiday(),
+                "Bashkortostan {month:02}-{day:02}"
+            );
         }
 
         for result in [
@@ -649,6 +652,36 @@ mod tests {
             assert!(!result.value().is_holiday());
             assert!(!result.value().is_working_day());
         }
+
+        assert!(
+            flags_ymd::<regions::Adygea>(2027, 5, 16)
+                .unwrap()
+                .value()
+                .is_transferred()
+        );
+        assert!(
+            flags_ymd::<regions::Bashkortostan>(2027, 5, 16)
+                .unwrap()
+                .value()
+                .is_transferred()
+        );
+
+        for result in [
+            flags_ymd::<regions::IrkutskOblast>(2027, 5, 11).unwrap(),
+            flags_ymd::<regions::KrasnodarKrai>(2027, 5, 11).unwrap(),
+            flags_ymd::<regions::PenzaOblast>(2027, 5, 11).unwrap(),
+            flags_ymd::<regions::SaratovOblast>(2027, 5, 11).unwrap(),
+            flags_ymd::<regions::StavropolKrai>(2027, 5, 11).unwrap(),
+        ] {
+            assert!(result.is_fact());
+            assert!(result.value().is_holiday());
+            assert!(result.value().is_day_off());
+        }
+
+        let result = flags_ymd::<regions::NorthOssetiaAlania>(2027, 11, 22).unwrap();
+        assert!(result.is_fact());
+        assert!(result.value().is_holiday());
+        assert!(result.value().is_day_off());
     }
 
     #[test]

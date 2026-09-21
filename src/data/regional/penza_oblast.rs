@@ -151,8 +151,20 @@ pub(crate) const Y2026: YearFact = YearFact {
     transferred_days: months! {},
 };
 
-static YEARS: [YearFact; 12] = [
-    Y2015, Y2016, Y2017, Y2018, Y2019, Y2020, Y2021, Y2022, Y2023, Y2024, Y2025, Y2026,
+/// Региональный overlay-календарь: Пензенская область, 2027 год.
+pub(crate) const Y2027: YearFact = YearFact {
+    holidays: months! {
+        // Закон Пензенской области от 10.04.2015 N 2700-ЗПО: Единый день поминовения усопших.
+        May: [11],
+    },
+    extra_days_off: months! {},
+    working_days: months! {},
+    short_days: months! {},
+    transferred_days: months! {},
+};
+
+static YEARS: [YearFact; 13] = [
+    Y2015, Y2016, Y2017, Y2018, Y2019, Y2020, Y2021, Y2022, Y2023, Y2024, Y2025, Y2026, Y2027,
 ];
 
 /// Прогноз регионального overlay-календаря по ежегодным фиксированным датам.

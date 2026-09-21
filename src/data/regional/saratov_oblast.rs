@@ -187,9 +187,21 @@ pub(crate) const Y2026: YearFact = YearFact {
     transferred_days: months! {},
 };
 
-static YEARS: [YearFact; 15] = [
+/// Региональный overlay-календарь: Саратовская область, 2027 год.
+pub(crate) const Y2027: YearFact = YearFact {
+    holidays: months! {
+        // Закон Саратовской области от 22.03.2012 N 26-ЗСО: Радоница - день особого поминовения усопших.
+        May: [11],
+    },
+    extra_days_off: months! {},
+    working_days: months! {},
+    short_days: months! {},
+    transferred_days: months! {},
+};
+
+static YEARS: [YearFact; 16] = [
     Y2012, Y2013, Y2014, Y2015, Y2016, Y2017, Y2018, Y2019, Y2020, Y2021, Y2022, Y2023, Y2024,
-    Y2025, Y2026,
+    Y2025, Y2026, Y2027,
 ];
 
 /// Прогноз регионального overlay-календаря по ежегодным фиксированным датам.

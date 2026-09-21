@@ -43,7 +43,19 @@ pub(crate) const Y2026: YearFact = YearFact {
     transferred_days: months! {},
 };
 
-static YEARS: [YearFact; 3] = [Y2024, Y2025, Y2026];
+/// Региональный overlay-календарь: Краснодарский край, 2027 год.
+pub(crate) const Y2027: YearFact = YearFact {
+    holidays: months! {
+        // Закон Краснодарского края от 02.06.2023 N 4909-КЗ: День поминовения усопших (Радоница).
+        May: [11],
+    },
+    extra_days_off: months! {},
+    working_days: months! {},
+    short_days: months! {},
+    transferred_days: months! {},
+};
+
+static YEARS: [YearFact; 4] = [Y2024, Y2025, Y2026, Y2027];
 
 /// Прогноз регионального overlay-календаря по ежегодным фиксированным датам.
 static PREDICT: YearFact = YearFact {
