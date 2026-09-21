@@ -41,14 +41,14 @@ dependencies = [
 
 [[package]]
 name = "holidays-ru-bindings-common"
-version = "0.2.1"
+version = "0.2.2"
 dependencies = [
  "holidays-ru",
 ]
 
 [[package]]
 name = "holidays-ru-python"
-version = "0.2.0"
+version = "0.2.2"
 dependencies = [
  "holidays-ru",
  "holidays-ru-bindings-common",

@@ -1,7 +1,7 @@
 name = "HolidaysRu"
 uuid = "a160caae-7eeb-47e1-8762-92386b93d97e"
 authors = ["holidays-ru contributors"]
-version = "0.2.1"
+version = "0.2.2"
 
 [deps]
 Dates = "ade2ca70-3891-5945-98fb-dc099432e06a"
