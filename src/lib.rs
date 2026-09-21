@@ -626,6 +626,32 @@ mod tests {
     }
 
     #[test]
+    fn test_2027_official_regional_holidays() {
+        for (month, day) in [(3, 9), (5, 11), (5, 16), (10, 5)] {
+            let result = flags_ymd::<regions::Adygea>(2027, month, day).unwrap();
+            assert!(result.is_fact(), "Adygea {month:02}-{day:02}");
+            assert!(result.value().is_holiday(), "Adygea {month:02}-{day:02}");
+        }
+
+        for (month, day) in [(3, 9), (5, 16), (10, 11)] {
+            let result = flags_ymd::<regions::Bashkortostan>(2027, month, day).unwrap();
+            assert!(result.is_fact(), "Bashkortostan {month:02}-{day:02}");
+            assert!(result.value().is_holiday(), "Bashkortostan {month:02}-{day:02}");
+        }
+
+        for result in [
+            flags_with_region_ymd::<regions::Adygea>(2027, 5, 17).unwrap(),
+            flags_with_region_ymd::<regions::Bashkortostan>(2027, 5, 17).unwrap(),
+        ] {
+            assert!(result.is_fact());
+            assert!(result.value().is_day_off());
+            assert!(result.value().is_transferred());
+            assert!(!result.value().is_holiday());
+            assert!(!result.value().is_working_day());
+        }
+    }
+
+    #[test]
     fn test_full_regional_calendar_supports_ranges() {
         type Tatarstan = FederalWithRegion<regions::Tatarstan>;
 
