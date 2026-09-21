@@ -36,7 +36,7 @@
 //!
 //! ## Поддерживаемые годы
 //!
-//! - **1993–2026**: официальные данные производственного календаря
+//! - **1993–2027**: официальные данные производственного календаря
 //!   (возвращаются как [`Resolved::Fact`]).
 //! - **1900–2100 вне диапазона официальных данных**: алгоритмический прогноз
 //!   на основе ТК РФ (возвращаются как [`Resolved::Predict`]).
@@ -458,10 +458,56 @@ mod tests {
 
     #[test]
     fn test_flags_ymd_predict() {
-        // 2027 год — за пределами официальных данных.
-        let r = flags_ymd::<Federal>(2027, 1, 1).unwrap();
+        // 2028 год — за пределами официальных данных.
+        let r = flags_ymd::<Federal>(2028, 1, 1).unwrap();
         assert!(r.is_predict());
         assert!(r.value().is_holiday());
+    }
+
+    #[test]
+    fn test_2027_official_calendar() {
+        for (month, day) in [(2, 22), (5, 3), (5, 10), (6, 14), (11, 5), (12, 31)] {
+            let result = flags_ymd::<Federal>(2027, month, day).unwrap();
+            assert!(result.is_fact());
+            assert!(result.value().is_day_off());
+            assert!(result.value().is_transferred());
+        }
+
+        let working_saturday = flags_ymd::<Federal>(2027, 2, 20).unwrap();
+        assert!(working_saturday.is_fact());
+        assert!(working_saturday.value().is_working_day());
+        assert!(working_saturday.value().is_short_day());
+        assert!(working_saturday.value().is_transferred());
+
+        for (month, day) in [(4, 30), (6, 11), (11, 3)] {
+            let result = flags_ymd::<Federal>(2027, month, day).unwrap();
+            assert!(result.is_fact());
+            assert!(result.value().is_short_day());
+        }
+
+        let december_30 = flags_ymd::<Federal>(2027, 12, 30).unwrap();
+        assert!(december_30.is_fact());
+        assert!(december_30.value().is_working_day());
+        assert!(!december_30.value().is_short_day());
+
+        let january_days_off =
+            non_working_days_between_ymd::<Federal>(2027, 1, 1, 2027, 2, 1).unwrap();
+        assert_eq!(january_days_off, Resolved::Fact(16));
+
+        for (week, minutes) in [
+            (WorkWeek::FortyHours, 120 * 60),
+            (WorkWeek::ThirtySixHours, 108 * 60),
+            (WorkWeek::TwentyFourHours, 72 * 60),
+        ] {
+            assert_eq!(
+                working_minutes_between_ymd::<Federal>(2027, 1, 1, 2027, 2, 1, week),
+                Some(Resolved::Fact(minutes)),
+            );
+        }
+
+        let days_off = non_working_days_between_ymd::<Federal>(2027, 1, 1, 2028, 1, 1).unwrap();
+        assert!(days_off.is_fact());
+        assert_eq!(days_off.value(), 118);
     }
 
     #[test]
@@ -730,7 +776,7 @@ mod tests {
 
         #[test]
         fn test_predict_with_naive_date() {
-            let date = NaiveDate::from_ymd_opt(2027, 1, 1).unwrap();
+            let date = NaiveDate::from_ymd_opt(2028, 1, 1).unwrap();
             let r = flags::<Federal, _>(date).unwrap();
             assert!(r.is_predict());
             assert!(r.value().is_holiday());
@@ -790,7 +836,7 @@ mod tests {
 
         #[test]
         fn test_predict_with_time_date() {
-            let date = Date::from_calendar_date(2027, Month::January, 1).unwrap();
+            let date = Date::from_calendar_date(2028, Month::January, 1).unwrap();
             let r = flags::<Federal, _>(date).unwrap();
             assert!(r.is_predict());
             assert!(r.value().is_holiday());

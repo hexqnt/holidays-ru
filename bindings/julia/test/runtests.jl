@@ -12,7 +12,7 @@ using Test
         @test is_day_off(Date(2026, 1, 9))
         @test is_transferred(info.flags)
 
-        predicted = day_info(Date(2027, 1, 1))
+        predicted = day_info(Date(2028, 1, 1))
         @test is_holiday(predicted)
         @test is_predicted(predicted)
     end
@@ -72,7 +72,7 @@ using Test
     @testset "validation and constants" begin
         @test isempty(detect_ambiguities(HolidaysRu))
         @test FIRST_FACT_YEAR == 1993
-        @test LAST_FACT_YEAR == 2026
+        @test LAST_FACT_YEAR == 2027
         @test MIN_YEAR == 1900
         @test MAX_YEAR == 2100
         @test UInt8(FortyHours) == 40

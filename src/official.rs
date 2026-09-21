@@ -78,7 +78,7 @@ mod tests {
         let d = RawDate::from_ymd(1992, 1, 1).unwrap();
         assert!(flags(d).is_none());
 
-        let d = RawDate::from_ymd(2027, 1, 1).unwrap();
+        let d = RawDate::from_ymd(2028, 1, 1).unwrap();
         assert!(flags(d).is_none());
     }
 

@@ -216,7 +216,7 @@ mod tests {
 
     #[test]
     fn test_2027_jan1_is_holiday() {
-        // 2027 нет в официальных данных — попадём в predict.
+        // Проверяем алгоритм прогноза напрямую, независимо от наличия официальных данных.
         let d = RawDate::from_ymd(2027, 1, 1).unwrap();
         let flags = flags(d);
         assert!(flags.is_holiday());

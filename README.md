@@ -109,7 +109,7 @@ assert_eq!(minutes, 1972 * 60);
 
 ### Federal calendar (`Federal`)
 
-- **1993–2026** — official production calendar data, returned as `Resolved::Fact`.
+- **1993–2027** — official production calendar data, returned as `Resolved::Fact`.
 - **1900–2100 outside the official-data range** — deterministic prediction based on the Labor Code, returned as `Resolved::Predict`.
 
 ### Regional calendars (`regions::*`)

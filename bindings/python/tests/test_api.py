@@ -15,7 +15,7 @@ def test_official_federal_day() -> None:
 
 
 def test_prediction_keeps_its_source() -> None:
-    info = holidays_ru.day_info(date(2027, 1, 1))
+    info = holidays_ru.day_info(date(2028, 1, 1))
 
     assert info.is_holiday
     assert info.is_predicted

@@ -120,7 +120,7 @@ mod tests {
     }
 
     #[test]
-    fn test_year_totals_2003_2026() {
+    fn test_year_totals_2003_2027() {
         for (year, calendar_days, working_days, non_working_days, h40, h36, h24) in [
             (2003, 365, 250, 115, 1992 * 60, 1792 * 60, 1192 * 60),
             (
@@ -322,6 +322,15 @@ mod tests {
                 1774 * 60 + 24,
                 1181 * 60 + 36,
             ),
+            (
+                2027,
+                365,
+                247,
+                118,
+                1972 * 60,
+                1774 * 60 + 24,
+                1181 * 60 + 36,
+            ),
         ] {
             let start = RawDate::from_ymd(year, 1, 1).expect("valid start date");
             let end = RawDate::from_ymd(year + 1, 1, 1).expect("valid end date");
@@ -384,8 +393,8 @@ mod tests {
 
     #[test]
     fn test_mixed_fact_predict_range_is_predict() {
-        let start = RawDate::from_ymd(2026, 12, 31).expect("valid start date");
-        let end = RawDate::from_ymd(2027, 1, 2).expect("valid end date");
+        let start = RawDate::from_ymd(2027, 12, 31).expect("valid start date");
+        let end = RawDate::from_ymd(2028, 1, 2).expect("valid end date");
 
         assert_eq!(
             non_working_days_between_raw::<crate::Federal>(start, end),
