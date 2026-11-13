@@ -20,6 +20,7 @@ keywords = [
     "calendar",
     "working-days",
     "production-calendar",
+    "business-days",
 ]
 categories = ["date-and-time", "data-structures"]
 include = [
