@@ -645,6 +645,7 @@ mod tests {
         for result in [
             flags_with_region_ymd::<regions::Adygea>(2027, 5, 17).unwrap(),
             flags_with_region_ymd::<regions::Bashkortostan>(2027, 5, 17).unwrap(),
+            flags_with_region_ymd::<regions::ZabaykalskyKrai>(2027, 2, 8).unwrap(),
         ] {
             assert!(result.is_fact());
             assert!(result.value().is_day_off());
@@ -682,6 +683,12 @@ mod tests {
         assert!(result.is_fact());
         assert!(result.value().is_holiday());
         assert!(result.value().is_day_off());
+
+        let result = flags_with_region_ymd::<regions::ZabaykalskyKrai>(2027, 2, 7).unwrap();
+        assert!(result.is_fact());
+        assert!(result.value().is_holiday());
+        assert!(result.value().is_day_off());
+        assert!(result.value().is_transferred());
     }
 
     #[test]

@@ -43,7 +43,20 @@ pub(crate) const Y2026: YearFact = YearFact {
     transferred_days: months! {},
 };
 
-static YEARS: [YearFact; 3] = [Y2024, Y2025, Y2026];
+/// Региональный overlay-календарь: Забайкальский край, 2027 год.
+///
+/// Постановление Губернатора Забайкальского края от 07.08.2026 № 95: Сагаалган.
+/// Источник: <https://base.garant.ru/414720227/>.
+pub(crate) const Y2027: YearFact = YearFact {
+    holidays: months! { Feb: [7] },
+    // Часть 2 статьи 2 Закона Забайкальского края № 1151-ЗЗК: перенос с воскресенья 7 февраля.
+    extra_days_off: months! { Feb: [8] },
+    working_days: months! {},
+    short_days: months! {},
+    transferred_days: months! { Feb: [7, 8] },
+};
+
+static YEARS: [YearFact; 4] = [Y2024, Y2025, Y2026, Y2027];
 
 /// Прогноз регионального overlay-календаря по ежегодным фиксированным датам.
 static PREDICT: YearFact = YearFact {
