@@ -13,6 +13,7 @@ repository = "https://github.com/hexqnt/holidays-ru"
 documentation = "https://docs.rs/holidays-ru"
 readme = "README.md"
 description = "A library for determining working days, weekends, and holidays in Russia."
+authors = ["hexqnt <hexqntlab@gmail.com>"]
 keywords = [
     "holidays",
     "russia",

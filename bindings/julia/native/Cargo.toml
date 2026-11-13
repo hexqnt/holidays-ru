@@ -5,7 +5,7 @@ resolver = "3"
 name = "holidays-ru-julia"
 version = "0.2.1"
 edition = "2024"
-rust-version = "1.85"
+rust-version = "1.97"
 publish = false
 license = "MIT OR Apache-2.0"
 repository = "https://github.com/hexqnt/holidays-ru"
@@ -18,7 +18,7 @@ crate-type = ["cdylib"]
 [dependencies]
 holidays-ru = { path = "../../..", version = "0.2.1" }
 holidays-ru-bindings-common = { path = "../../common" }
-jlrs = { version = "0.23.0", default-features = false, features = ["ccall"] }
+jlrs = { version = "0.24.0", default-features = false, features = ["ccall"] }
 
 [profile.dev]
 panic = "abort"
